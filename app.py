@@ -19,4 +19,4 @@ app.layout = html.Div(
 )
 
 if __name__ == "__main__":
-    app.run(debug=True, port=3000) 
+    app.run(debug=True, host="0.0.0.0", port=3000) #http://192.168.0.141:3000

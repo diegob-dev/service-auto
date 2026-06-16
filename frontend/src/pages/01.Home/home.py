@@ -1,27 +1,30 @@
-import json
 import os
-from dash import html, dcc
+import sys
+from dash import html
 import dash_bootstrap_components as dbc
 
-# Load config
-with open("config.json", "r", encoding="utf-8") as f:
-    cfg = json.load(f)
-
-PATHS = cfg["paths"]
+# Importa configurazione centralizzata
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from app_config import cfg, PATHS, get_path, read_text
 
 # ── carousel items ─────────────────────────────────────────────────────────────
 
 EXTS = {".jpg", ".jpeg", ".png", ".webp"}
-assets_dir = PATHS["assets"]
+assets_dir = get_path("assets")
 slide_files = sorted([
     f for f in os.listdir(assets_dir)
     if os.path.splitext(f)[1].lower() in EXTS
     and f != os.path.basename(PATHS["immagine_concessionaria"])
+    and not f.endswith(".txt")
 ])
 carousel_items = [
-    {"key": str(i), "src": f"/{assets_dir}{fname}"}
+    {"key": str(i), "src": f"/assets/{fname}"}
     for i, fname in enumerate(slide_files)
-] or [{"key": "0", "src": "/" + PATHS["immagine_concessionaria"]}]
+] or [{"key": "0", "src": "/assets/" + os.path.basename(PATHS["immagine_concessionaria"])}]
+
+# ── descrizione ────────────────────────────────────────────────────────────────
+
+descrizione = read_text("descrizione")
 
 # ── layout ─────────────────────────────────────────────────────────────────────
 
@@ -64,15 +67,10 @@ layout = html.Div([
                 "fontFamily": "Playfair Display", "fontSize": "2rem",
                 "color": "#1a1a1a", "marginBottom": "16px"
             }),
-            html.P(
-                "Service Srl è una azienda storica del vigevanese. Nata come autofficina si è "
-                "evoluta nel tempo diventando officina autorizzata per alcuni dei marchi del settore "
-                "e affiancando un autosalone per la vendita diretta.",
-                style={
-                    "fontFamily": "Inter", "fontWeight": "300",
-                    "lineHeight": "1.8", "color": "#444", "maxWidth": "640px"
-                }
-            )
+            html.P(descrizione, style={
+                "fontFamily": "Inter", "fontWeight": "300",
+                "lineHeight": "1.8", "color": "#444", "maxWidth": "640px"
+            })
         ], style={"flex": "1", "minWidth": "280px"}),
 
         # INFO BOX

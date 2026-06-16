@@ -24,7 +24,7 @@ carousel_items = [
 
 # ── descrizione ────────────────────────────────────────────────────────────────
 
-descrizione = read_text("descrizione")
+descrizione_paragrafi = [p.strip() for p in read_text("descrizione").split("\n\n") if p.strip()]
 
 # ── layout ─────────────────────────────────────────────────────────────────────
 
@@ -67,10 +67,13 @@ layout = html.Div([
                 "fontFamily": "Playfair Display", "fontSize": "2rem",
                 "color": "#1a1a1a", "marginBottom": "16px"
             }),
-            html.P(descrizione, style={
-                "fontFamily": "Inter", "fontWeight": "300",
-                "lineHeight": "1.8", "color": "#444", "maxWidth": "640px"
-            })
+            html.Div([
+                html.P(p, style={
+                    "fontFamily": "Inter", "fontWeight": "300",
+                    "lineHeight": "1.8", "color": "#444", "maxWidth": "640px",
+                    "marginBottom": "16px"
+                }) for p in descrizione_paragrafi
+            ])
         ], style={"flex": "1", "minWidth": "280px"}),
 
         # INFO BOX
@@ -123,6 +126,123 @@ layout = html.Div([
     ], style={
         "display": "flex", "flexWrap": "wrap", "gap": "48px",
         "maxWidth": "1100px", "margin": "64px auto", "padding": "0 5%"
+    }),
+
+
+    # SERVIZI
+    html.Div([
+        html.Div([
+            html.P("I NOSTRI SERVIZI", style={
+                "letterSpacing": "4px", "fontSize": "12px",
+                "color": "#C9A84C", "marginBottom": "12px",
+                "fontFamily": "Inter", "textAlign": "center"
+            }),
+            html.H2("Professionalità, cortesia e onestà", style={
+                "fontFamily": "Playfair Display", "fontSize": "2rem",
+                "color": "#1a1a1a", "marginBottom": "16px", "textAlign": "center"
+            }),
+            html.P(
+                "Da oltre vent'anni mettiamo al centro il cliente. "
+                "Ogni intervento viene eseguito con cura, trasparenza sui costi e rispetto dei tempi.",
+                style={
+                    "fontFamily": "Inter", "fontWeight": "300", "color": "#555",
+                    "textAlign": "center", "maxWidth": "600px",
+                    "margin": "0 auto 48px", "lineHeight": "1.8"
+                }
+            ),
+        ]),
+
+        # Cards servizi
+        html.Div([
+
+            # Vendita auto
+            html.Div([
+                html.Div("🚗", style={"fontSize": "2.5rem", "marginBottom": "16px"}),
+                html.H3("Vendita Auto", style={
+                    "fontFamily": "Playfair Display", "fontSize": "1.3rem",
+                    "color": "#1a1a1a", "marginBottom": "10px"
+                }),
+                html.P(
+                    "Ampia selezione di auto usate e km 0, selezionate con cura e garantite. "
+                    "Ti accompagniamo in ogni fase dell'acquisto con consulenza personalizzata.",
+                    style={"fontFamily": "Inter", "fontWeight": "300",
+                           "color": "#555", "lineHeight": "1.7", "fontSize": "0.95rem"}
+                ),
+            ], style={
+                "flex": "1", "minWidth": "220px", "padding": "32px",
+                "backgroundColor": "#fff", "borderRadius": "4px",
+                "boxShadow": "0 2px 12px rgba(0,0,0,0.07)",
+                "borderTop": "3px solid #C9A84C"
+            }),
+
+            # Officina autorizzata Volvo
+            html.Div([
+                html.Div("🔧", style={"fontSize": "2.5rem", "marginBottom": "16px"}),
+                html.H3("Officina Autorizzata Volvo", style={
+                    "fontFamily": "Playfair Display", "fontSize": "1.3rem",
+                    "color": "#1a1a1a", "marginBottom": "10px"
+                }),
+                html.P(
+                    "Dal 2023 officina autorizzata Volvo. Tecnici certificati, "
+                    "ricambi originali e strumentazione diagnostica ufficiale per garantire "
+                    "il massimo standard qualitativo sul tuo veicolo.",
+                    style={"fontFamily": "Inter", "fontWeight": "300",
+                           "color": "#555", "lineHeight": "1.7", "fontSize": "0.95rem"}
+                ),
+            ], style={
+                "flex": "1", "minWidth": "220px", "padding": "32px",
+                "backgroundColor": "#fff", "borderRadius": "4px",
+                "boxShadow": "0 2px 12px rgba(0,0,0,0.07)",
+                "borderTop": "3px solid #1a1a1a"
+            }),
+
+            # Riparazioni generali
+            html.Div([
+                html.Div("⚙️", style={"fontSize": "2.5rem", "marginBottom": "16px"}),
+                html.H3("Riparazioni e Manutenzione", style={
+                    "fontFamily": "Playfair Display", "fontSize": "1.3rem",
+                    "color": "#1a1a1a", "marginBottom": "10px"
+                }),
+                html.P(
+                    "Tagliandi, revisioni, freni, gomme e molto altro. "
+                    "Interveniamo su tutte le marche con diagnosi accurata e preventivi chiari, "
+                    "senza sorprese.",
+                    style={"fontFamily": "Inter", "fontWeight": "300",
+                           "color": "#555", "lineHeight": "1.7", "fontSize": "0.95rem"}
+                ),
+            ], style={
+                "flex": "1", "minWidth": "220px", "padding": "32px",
+                "backgroundColor": "#fff", "borderRadius": "4px",
+                "boxShadow": "0 2px 12px rgba(0,0,0,0.07)",
+                "borderTop": "3px solid #C9A84C"
+            }),
+
+            # Auto sostitutiva
+            html.Div([
+                html.Div("🔑", style={"fontSize": "2.5rem", "marginBottom": "16px"}),
+                html.H3("Auto Sostitutiva Gratuita", style={
+                    "fontFamily": "Playfair Display", "fontSize": "1.3rem",
+                    "color": "#1a1a1a", "marginBottom": "10px"
+                }),
+                html.P(
+                    "Non restare senza mobilità. Durante la riparazione mettiamo a disposizione "
+                    "un'auto sostitutiva gratuita, soggetta a disponibilità.",
+                    style={"fontFamily": "Inter", "fontWeight": "300",
+                           "color": "#555", "lineHeight": "1.7", "fontSize": "0.95rem"}
+                ),
+            ], style={
+                "flex": "1", "minWidth": "220px", "padding": "32px",
+                "backgroundColor": "#fff", "borderRadius": "4px",
+                "boxShadow": "0 2px 12px rgba(0,0,0,0.07)",
+                "borderTop": "3px solid #1a1a1a"
+            }),
+
+        ], style={
+            "display": "flex", "flexWrap": "wrap", "gap": "24px",
+        }),
+
+    ], style={
+        "maxWidth": "1100px", "margin": "0 auto 80px", "padding": "0 5%"
     }),
 
     # MAPPA

@@ -1,0 +1,12 @@
+[project]
+name = "service-auto"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pyautogui>=0.9.54",
+]

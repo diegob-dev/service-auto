@@ -1,0 +1,82 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/anton";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Base */
+  --background: #f8f9fb;
+  --foreground: #0b0f14;
+
+  /* Surface */
+  --card: #ffffff;
+  --card-foreground: #0b0f14;
+
+  /* Brand */
+  --primary: #479ee4;
+  --primary-dark: #357ab8;
+  --primary-foreground: #ffffff;
+
+  /* Neutral */
+  --secondary: #1a222c;
+  --secondary-foreground: #e6eaf0;
+
+  /* UI */
+  --muted: #f4f4f5;
+  --muted-foreground: #6b7280;
+
+  --accent: #eef5fa;
+  --accent-foreground: #4e7fa8;
+
+  --border: #dbe1e7;
+  --input: #dbe1e7;
+  --ring: #4e7fa8;
+
+  --destructive: #dc2626;
+
+  --radius: 0.75rem;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-display: "Anton", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    font-family: "Inter", sans-serif;
+    background-color: var(--color-background);
+  }
+}

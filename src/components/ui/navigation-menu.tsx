@@ -15,7 +15,7 @@ function NavigationMenu({
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
       className={cn(
-        "items-center flex h-25 w-full justify-center px-4 bg-foreground text-white-soft shadow-md",
+        "items-center flex h-25 w-full justify-center bg-foreground text-white-soft shadow-md",
         className,
       )}
       {...props}

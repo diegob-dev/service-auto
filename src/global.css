@@ -19,6 +19,7 @@
   /* Brand */
   --primary: #479ee4;
   --primary-dark: #357ab8;
+  --primary-dark-button: #18578d;
   --primary-foreground: #ffffff;
 
   /* Neutral */
@@ -50,6 +51,7 @@
 
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  --color-primary-dark-button: var(--primary-dark-button);
   --color-primary-foreground: var(--primary-foreground);
 
   --color-secondary: var(--secondary);

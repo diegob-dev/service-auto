@@ -1,19 +1,21 @@
-type ContainerProps = {
+export type ContainerProps = {
   children: React.ReactNode;
   className?: string;
+  size?: "default" | "large";
 };
 
-export function Container({ children, className = "" }: ContainerProps) {
-  return (
-    <div className={`max-w-360 mx-auto px-4 ${className}`}>{children}</div> // max width 1440px
-  );
-}
+const maxWidths = {
+  default: "max-w-360 px-4 sm:px-6 lg:px-8",
+  large: "max-w-500 px-4 sm:px-6 lg:px-8",
+};
 
-export function ContainerLarge({ children, className = "" }: ContainerProps) {
+export function Container({
+  children,
+  className = "",
+  size = "default",
+}: ContainerProps) {
   return (
-    <div
-      className={`mx-auto w-full max-w-500 px-4 sm:px-6 lg:px-8 ${className}`} // max width 1840px
-    >
+    <div className={`mx-auto w-full ${maxWidths[size]} ${className}`}>
       {children}
     </div>
   );

@@ -1,16 +1,33 @@
-import { ImageCard } from "./components/ImageCard";
+import { ImageMaxWidth } from "./components/ImageMaxWidth";
 import ServiceImage from "../../assets/service-image.jpg";
-import { Container, ContainerLarge } from "../../app/layouts/Container";
+import { Container } from "../../app/layouts/Container";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Car, Wrench } from "lucide-react";
+import {
+  Award,
+  Car,
+  CircuitBoard,
+  ShieldCheck,
+  Snowflake,
+  SquareActivity,
+  Star,
+  Wrench,
+} from "lucide-react";
 import { CarsList } from "./components/CarsList";
+import { useHomepage } from "./hooks/useHomepage";
+import { Section } from "@/app/layouts/Section";
+import { OptionsList } from "@/shared/components/OptionsList";
 
 export const Homepage = () => {
+  const { cars, isLoading, isError } = useHomepage();
+
   return (
     <>
-      <ImageCard src={ServiceImage} alt="Service Image">
-        <ContainerLarge className="flex h-full items-center">
+      <ImageMaxWidth src={ServiceImage} alt="Service Image">
+        <Container
+          size="large"
+          className="flex h-full items-center justify-start "
+        >
           <div>
             <h1 className="font-display tracking-medium text-5xl uppercase leading-tight text-white-soft md:text-6xl">
               Officina specializzata <br />
@@ -38,11 +55,81 @@ export const Homepage = () => {
               </Button>
             </div>
           </div>
-        </ContainerLarge>
-      </ImageCard>
-      <Container>
-        <CarsList />
-      </Container>
+        </Container>
+      </ImageMaxWidth>
+      <Section tone="light" height="md">
+        <CarsList cars={cars} isLoading={isLoading} isError={isError} />
+      </Section>
+      <Section tone="dark" height="md">
+        <OptionsList
+          title={
+            <>
+              I nostri <span className="text-primary">servizi</span> officina
+            </>
+          }
+          primaryButton="Scopri tutti i servizi"
+          variant="dark"
+          icons={[
+            {
+              title: "Diagnosi computerizzata",
+              description:
+                "Tecnologia ufficiale Volvo per una diagnosi precisa e affidabile.",
+              icon: <SquareActivity size={50} />,
+            },
+            {
+              title: "Tagliandi",
+              description:
+                "Tagliandi secondo gli standard Volvo con ricambi originali e certificati.",
+              icon: <Wrench size={50} />,
+            },
+            {
+              title: "Elettronica",
+              description:
+                "Riparazioni e interventi su centraline, sensori e sistemi elettronici.",
+              icon: <CircuitBoard size={50} />,
+            },
+            {
+              title: "Pneumatici",
+              description:
+                "Vendita e assistenza pneumatici delle migliori marche.",
+              icon: <Car size={50} />,
+            },
+            {
+              title: "Climatizzatore",
+              description:
+                "Ricarica, sanificatzione e manutenzione impianti climatizzazione.",
+              icon: <Snowflake size={50} />,
+            },
+          ]}
+        />
+      </Section>
+      <Section tone="light" height="md">
+        <OptionsList
+          variant="light"
+          icons={[
+            {
+              title: "Specializzati Volvo",
+              description: "Conosciamo ogni dettaglio della tua Volvo.",
+              icon: <ShieldCheck size={50} />,
+            },
+            {
+              title: "Esperienza",
+              description: "Anni di esperienza nel settore automobilistico.",
+              icon: <Award size={50} />,
+            },
+            {
+              title: "Recensioni",
+              description: "4.4/5 su Google con oltre 100 recensioni positive.",
+              icon: <Star size={50} />,
+            },
+            {
+              title: "Garanzia",
+              description: "Garanzia su tutti i nostri veicoli usati.",
+              icon: <ShieldCheck size={50} />,
+            },
+          ]}
+        />
+      </Section>
     </>
   );
 };

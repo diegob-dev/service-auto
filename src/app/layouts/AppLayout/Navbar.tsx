@@ -9,7 +9,7 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Logo } from "./Logo";
 import { Phone } from "lucide-react";
-import { ContainerLarge } from "../Container";
+import { Container } from "../Container";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -43,7 +43,10 @@ export const Navbar = () => {
 
   return (
     <NavigationMenu className="sticky top-0 z-50">
-      <ContainerLarge className="flex items-center justify-between gap-4">
+      <Container
+        size="large"
+        className="flex items-center justify-between gap-4"
+      >
         <Logo />
         <NavigationMenuList>
           {links.map((link) => (
@@ -63,7 +66,7 @@ export const Navbar = () => {
             Contattaci
           </Button>
         </div>
-      </ContainerLarge>
+      </Container>
     </NavigationMenu>
   );
 };

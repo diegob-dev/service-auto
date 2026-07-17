@@ -1,23 +1,35 @@
 {
   "$schema": "./node_modules/json-server/schema.json",
-  "auto": [
+  "cars": [
     {
       "id": 1,
       "model": "Volvo XC90",
       "description": "1.5 T5 R-Design AWD Geartronic",
+      "src": "https://cdn-xy.drivek.com/eyJidWNrZXQiOiJtay13cCIsImtleSI6ImI3ODdkNTg1XC91cGxvYWRzXC9zaXRlc1wvNDBcLzIwMTVcLzA3XC92b2x2by14YzkwLWV4Y2VsbGVuY2UuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo5NjAsImhlaWdodCI6NTQwLCJmaXQiOiJjb3ZlciJ9fX0=",
       "year": 2023,
       "kilometers": 1000,
       "price": 33900,
-      "fuel": "diesel"
+      "fuel": "Diesel"
     },
     {
       "id": 2,
       "model": "Volvo XC60",
       "description": "2.0 T6 R-Design AWD Geartronic",
+      "src": "https://www.ginospa.com/wistaging/images/original/9efa65b4-21f4-45e7-abb6-59b8e712b8b4/img-750x563px-hero-volvo-xc60.jpg",
       "year": 2024,
       "kilometers": 2000,
       "price": 29900,
-      "fuel": "petrol"
+      "fuel": "Benzina"
+    },
+    {
+      "id": 3,
+      "model": "Volvo XC30",
+      "description": "1.2 T5 R-Design AWD Geartronic",
+      "src": "https://cdn.motor1.com/images/mgl/jl9MLk/s1/2024-volvo-ex30-exterior.jpg",
+      "year": 2022,
+      "kilometers": 60000,
+      "price": 20000,
+      "fuel": "Benzina"
     }
   ],
   "comments": [

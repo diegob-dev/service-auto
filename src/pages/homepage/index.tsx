@@ -97,7 +97,7 @@ export const Homepage = () => {
             {
               title: "Climatizzatore",
               description:
-                "Ricarica, sanificatzione e manutenzione impianti climatizzazione.",
+                "Ricarica, sanificazione e manutenzione impianti climatizzazione.",
               icon: <Snowflake size={50} />,
             },
           ]}

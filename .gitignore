@@ -24,3 +24,15 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+#
+data/*
+.venv
+*.exe
+*.bat
+*.json
+*.jpg
+*.png
+*.txt
+*.log
+__pycache__

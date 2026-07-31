@@ -1,8 +1,8 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
-// Se in futuro avrai un backend reale, basta cambiare questa env var
-// (in .env: VITE_API_URL=http://localhost:3000)
-const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+// In sviluppo può puntare a json-server; in produzione va configurata
+// esplicitamente dal provider di hosting.
+const baseURL = import.meta.env.VITE_API_URL;
 
 export const apiClient = axios.create({
   baseURL,

@@ -1,8 +1,7 @@
 import { ImageMaxWidth } from "./components/ImageMaxWidth";
 import ServiceImage from "../../assets/service-image.jpg";
 import { Container } from "../../app/layouts/Container";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { ButtonLink } from "@/components/ui/button-link";
 import {
   Award,
   Car,
@@ -29,30 +28,23 @@ export const Homepage = () => {
           className="flex h-full items-center justify-start "
         >
           <div>
-            <h1 className="font-display tracking-medium text-5xl uppercase leading-tight text-white-soft md:text-6xl">
+            <h1 className="font-display text-4xl uppercase leading-tight tracking-medium text-background sm:text-5xl md:text-6xl">
               Officina specializzata <br />
               <span className="text-primary-dark">Volvo</span>
               <br />e auto usate garantite
             </h1>
-            <p className="mt-4 text-lg text-white-soft/80">
+            <p className="mt-4 text-lg text-background/80">
               Passione. Competenza. Affidabilità.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Button variant="default" size="lg">
-                <Link
-                  to="/contatti"
-                  className="flex items-center h-full w-full"
-                >
-                  <Wrench className="mr-2 size-4" />
-                  Prenota appuntamento
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg">
-                <Link to="/auto-usate" className="flex items-center">
-                  <Car className="mr-2 size-4" />
-                  Scopri auto usate
-                </Link>
-              </Button>
+              <ButtonLink variant="default" size="lg" to="/contatti">
+                <Wrench className="mr-2 size-4" />
+                Prenota appuntamento
+              </ButtonLink>
+              <ButtonLink variant="outline" size="lg" to="/auto-usate">
+                <Car className="mr-2 size-4" />
+                Scopri auto usate
+              </ButtonLink>
             </div>
           </div>
         </Container>
@@ -68,6 +60,7 @@ export const Homepage = () => {
             </>
           }
           primaryButton="Scopri tutti i servizi"
+          primaryButtonHref="/servizi"
           variant="dark"
           icons={[
             {
@@ -103,7 +96,7 @@ export const Homepage = () => {
           ]}
         />
       </Section>
-      <Section tone="light" height="md">
+      <Section tone="light" height="sm">
         <OptionsList
           variant="light"
           icons={[

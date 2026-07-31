@@ -1,8 +1,7 @@
 import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu";
-import { cva } from "class-variance-authority";
-
 import { ChevronDownIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { navigationMenuTriggerStyle } from "./navigation-menu-styles";
 
 function NavigationMenu({
   align = "start",
@@ -15,7 +14,7 @@ function NavigationMenu({
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
       className={cn(
-        "items-center flex h-25 w-full justify-center bg-foreground text-white-soft shadow-md",
+        "items-center flex h-25 w-full justify-center bg-foreground text-background shadow-md",
         className,
       )}
       {...props}
@@ -54,33 +53,6 @@ function NavigationMenuItem({
     />
   );
 }
-
-const navigationMenuTriggerStyle = cva(
-  [
-    "relative",
-    "inline-flex",
-    "items-center",
-    "justify-center",
-    "h-10",
-    "px-5",
-    "font-medium",
-    "tracking-wide",
-    "uppercase",
-    "text-md",
-    "text-background",
-    "transition-all",
-    "focus-visible:ring-2",
-    "hover:text-primary",
-  ].join(" "),
-  {
-    variants: {
-      active: {
-        true: "text-primary border-b-2 border-primary",
-        false: "",
-      },
-    },
-  },
-);
 
 function NavigationMenuTrigger({
   className,
@@ -189,6 +161,5 @@ export {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
   NavigationMenuPositioner,
 };

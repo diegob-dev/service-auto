@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button-link";
 import {
   Card,
   CardContent,
@@ -51,9 +51,12 @@ export function CardImage({
         <p className="text-xl font-semibold text-primary-dark">
           {numberFormatter.format(car.price)} €
         </p>
-        <Button variant="default" className="w-full uppercase">
+        <ButtonLink
+          className="w-full uppercase"
+          to={`/auto-usate/${car.id}`}
+        >
           {buttonText}
-        </Button>
+        </ButtonLink>
       </CardFooter>
     </Card>
   );

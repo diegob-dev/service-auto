@@ -11,13 +11,13 @@ export const IconsListCard = ({
     variant === "dark" ? "text-secondary-foreground" : " text-foreground";
   return (
     <div
-      className={`flex flex-row items-stretch divide-x divide-muted-foreground/30 w-full ${containerClassName}`}
+      className={`grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(0,1fr))] ${containerClassName}`}
     >
       {icons &&
         icons.map((icon, index) => (
           <div
-            key={index}
-            className="flex flex-1 flex-col items-center text-center gap-2 px-6"
+            key={`${icon.title}-${index}`}
+            className="flex flex-col items-center gap-2 border-muted-foreground/30 px-4 text-center sm:border-l sm:first:border-l-0 lg:px-6"
           >
             <div className="mb-3 text-primary">{icon.icon}</div>
             <div className="flex flex-col items-center justify-between gap-2 w-full">

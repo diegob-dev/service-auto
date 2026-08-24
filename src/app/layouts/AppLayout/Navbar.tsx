@@ -12,16 +12,7 @@ import { Logo } from "./Logo";
 import { Menu, Phone, X } from "lucide-react";
 import { Container } from "../Container";
 import { useState } from "react";
-import { PHONE_NUMBER } from "@/constants";
-
-const links = [
-  { label: "Home", href: "/" },
-  { label: "Officina", href: "/officina" },
-  { label: "Servizi", href: "/servizi" },
-  { label: "Auto usate", href: "/auto-usate" },
-  { label: "Chi siamo", href: "/chi-siamo" },
-  { label: "Contatti", href: "/contatti" },
-];
+import { NAV_LINKS, PHONE_NUMBER } from "@/constants";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -41,7 +32,7 @@ export const Navbar = () => {
       >
         <Logo />
         <NavigationMenuList className="hidden lg:flex">
-          {links.map((link) => (
+          {NAV_LINKS.map((link) => (
             <NavigationMenuItem key={link.href}>
               <NavigationMenuLink
                 className={navigationMenuTriggerStyle({
@@ -76,7 +67,7 @@ export const Navbar = () => {
           className="absolute inset-x-0 top-full border-t border-muted-foreground/30 bg-foreground p-4 shadow-lg lg:hidden"
         >
           <nav aria-label="Navigazione mobile" className="flex flex-col gap-1">
-            {links.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}

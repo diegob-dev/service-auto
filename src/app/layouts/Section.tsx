@@ -4,20 +4,23 @@ import { cn } from "@/lib/utils";
 type SectionProps = {
   tone?: "light" | "dark";
   children: React.ReactNode;
-  height?: "sm" | "md" | "lg";
+  height?: "none" | "sm" | "md" | "lg";
+  fullWidth?: boolean;
   size?: ContainerProps["size"];
 } & React.ComponentProps<"section">;
 
 const paddingClasses = {
-  sm: "py-5 md:py-10",
-  md: "py-10 md:py-15",
-  lg: "py-15 md:py-20",
+  none: "",
+  sm: "py-10",
+  md: "py-15",
+  lg: "py-20",
 };
 
 export const Section = ({
   tone = "light",
   children,
   height = "sm",
+  fullWidth = false,
   size = "default",
   className,
   ...props
@@ -37,7 +40,7 @@ export const Section = ({
       )}
       {...props}
     >
-      <Container size={size}>{children}</Container>
+      {fullWidth ? children : <Container size={size}>{children}</Container>}
     </section>
   );
 };

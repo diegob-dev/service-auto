@@ -11,7 +11,7 @@ import type { Car } from "@/pages/homepage/types";
 import { numberFormatter } from "@/utils/utils";
 import { CalendarDays, Fuel, Gauge } from "lucide-react";
 
-export function CardImage({
+export function CardCarWithImage({
   car,
   buttonText,
 }: {
@@ -51,10 +51,7 @@ export function CardImage({
         <p className="text-xl font-semibold text-primary-dark">
           {numberFormatter.format(car.price)} €
         </p>
-        <ButtonLink
-          className="w-full uppercase"
-          to={`/auto-usate/${car.id}`}
-        >
+        <ButtonLink className="w-full uppercase" to={`/auto-usate/${car.id}`}>
           {buttonText}
         </ButtonLink>
       </CardFooter>

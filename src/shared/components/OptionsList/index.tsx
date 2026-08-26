@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { IconsListCard } from "@/pages/homepage/components/IconsListCard";
-import { SectionTitle } from "@/shared/components/SectionTitle";
 import type { ReactNode } from "react";
 
 export interface OptionsListProps {
@@ -18,7 +17,6 @@ export interface OptionsListProps {
 
 export const OptionsList = ({
   icons,
-  title,
   primaryButton,
   secondaryButton,
   primaryButtonClick,
@@ -34,18 +32,13 @@ export const OptionsList = ({
     <div
       className={`flex flex-col items-center justify-center gap-8 py-3 ${containerClassName}`}
     >
-      {title && <SectionTitle>{title}</SectionTitle>}
       <IconsListCard icons={icons} variant={variant} />
       {primaryButton && primaryButtonHref ? (
         <ButtonLink to={primaryButtonHref} size="lg">
           {primaryButton}
         </ButtonLink>
       ) : primaryButton ? (
-        <Button
-          variant="default"
-          size="lg"
-          onClick={primaryButtonClick}
-        >
+        <Button variant="default" size="lg" onClick={primaryButtonClick}>
           {primaryButton}
         </Button>
       ) : null}
@@ -54,11 +47,7 @@ export const OptionsList = ({
           {secondaryButton}
         </ButtonLink>
       ) : secondaryButton ? (
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={secondaryButtonClick}
-        >
+        <Button variant="outline" size="lg" onClick={secondaryButtonClick}>
           {secondaryButton}
         </Button>
       ) : null}

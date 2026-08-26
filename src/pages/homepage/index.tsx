@@ -1,5 +1,6 @@
 import { ImageMaxWidth } from "./components/ImageMaxWidth";
 import ServiceImage from "../../assets/service-image.jpg";
+import WorkshopSpecialistsImage from "../../assets/workshop-specialists.jpg";
 import { Container } from "../../app/layouts/Container";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
@@ -16,6 +17,8 @@ import { CarsList } from "./components/CarsList";
 import { useHomepage } from "./hooks/useHomepage";
 import { Section } from "@/app/layouts/Section";
 import { OptionsList } from "@/shared/components/OptionsList";
+import { CardTextWithImage } from "@/shared/components/CardTextWithImage";
+import { SectionHeader } from "@/shared/components/SectionHeader";
 
 export const Homepage = () => {
   const { cars, isLoading, isError } = useHomepage();
@@ -23,10 +26,7 @@ export const Homepage = () => {
   return (
     <>
       <ImageMaxWidth src={ServiceImage} alt="Service Image">
-        <Container
-          size="large"
-          className="flex h-full items-center justify-start "
-        >
+        <Container className="flex h-full items-center justify-start">
           <div>
             <h1 className="font-display text-4xl uppercase leading-tight tracking-medium text-background sm:text-5xl md:text-6xl">
               Officina specializzata <br />
@@ -50,15 +50,27 @@ export const Homepage = () => {
         </Container>
       </ImageMaxWidth>
       <Section tone="light" height="md">
+        <SectionHeader
+          margin="sm"
+          title={
+            <>
+              Auto usate <span className="text-primary-dark">in evidenza</span>
+            </>
+          }
+        />
         <CarsList cars={cars} isLoading={isLoading} isError={isError} />
       </Section>
       <Section tone="dark" height="md">
-        <OptionsList
+        <SectionHeader
+          align="center"
+          showLines
           title={
             <>
               I nostri <span className="text-primary">servizi</span> officina
             </>
           }
+        />
+        <OptionsList
           primaryButton="Scopri tutti i servizi"
           primaryButtonHref="/servizi"
           variant="dark"
@@ -94,6 +106,27 @@ export const Homepage = () => {
               icon: <Snowflake size={50} />,
             },
           ]}
+        />
+      </Section>
+      <Section tone="light" height="none" fullWidth>
+        <CardTextWithImage
+          eyebrow="Competenza in officina"
+          title={
+            <>
+              Specialisti Volvo, <span className="text-primary">davvero</span>
+            </>
+          }
+          description="Ogni giorno lavoriamo per mantenere alte la qualità e la sicurezza della tua Volvo, con interventi chiari e attenzione per ogni dettaglio."
+          options={[
+            "Tecnici preparati e diagnosi computerizzata",
+            "Ricambi originali e certificati",
+            "Assistenza trasparente e su misura",
+          ]}
+          image={{
+            src: WorkshopSpecialistsImage,
+            alt: "Tecnico specializzato al lavoro su un'auto in officina",
+          }}
+          cta={{ label: "Scopri la nostra officina", to: "/officina" }}
         />
       </Section>
       <Section tone="light" height="sm">

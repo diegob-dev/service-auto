@@ -2,7 +2,7 @@ import { Container, type ContainerProps } from "./Container";
 import { cn } from "@/lib/utils";
 
 type SectionProps = {
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "primary";
   children: React.ReactNode;
   height?: "none" | "sm" | "md" | "lg";
   fullWidth?: boolean;
@@ -28,7 +28,9 @@ export const Section = ({
   const toneClass =
     tone === "light"
       ? "bg-background text-foreground"
-      : "bg-foreground text-background";
+      : tone === "dark"
+        ? "bg-foreground text-background"
+        : "bg-primary-dark text-background";
 
   return (
     <section

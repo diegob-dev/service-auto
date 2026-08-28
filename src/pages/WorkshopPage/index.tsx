@@ -67,7 +67,10 @@ export function WorkshopPage() {
         </div>
       </Section>
 
-      <CallToAction />
+      <CallToAction
+        title="Prenota il tuo appuntamento"
+        subtitle="Raccontaci cosa serve alla tua auto: ti aiutiamo a scegliere l'intervento giusto."
+      />
     </>
   );
 }

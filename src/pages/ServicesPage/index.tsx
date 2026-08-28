@@ -12,6 +12,9 @@ import {
   Medal,
   WrenchIcon,
   Users,
+  CalendarDays,
+  Search,
+  CalendarPlus,
 } from "lucide-react";
 import { PageHero } from "@/shared/components/PageHero";
 import { FeatureGrid, type Feature } from "@/shared/components/FeatureGrid";
@@ -27,6 +30,7 @@ import FreniImage from "@/assets/freno.png";
 import PneumaticiImage from "@/assets/pneumatici.png";
 import PreRevisioneImage from "@/assets/pre-revisione.png";
 import TagliandoImage from "@/assets/tagliando.png";
+import { Steps, type Step } from "@/shared/components/Steps";
 
 const services: Feature[] = [
   {
@@ -113,6 +117,31 @@ const competences: Feature[] = [
   },
 ];
 
+const steps: Step[] = [
+  {
+    icon: CalendarDays,
+    title: "Prenotazione",
+    description: "Ci contatti e prenoti il tuo appuntamento quando preferisci.",
+  },
+  {
+    icon: Search,
+    title: "Diagnosi",
+    description: "Analizziamo la tua auto con strumenti avanzati e competenza.",
+  },
+  {
+    icon: Wrench,
+    title: "Intervento",
+    description:
+      "Eseguiamo il lavoro con cura, utilizzando ricambi di qualità.",
+  },
+  {
+    icon: Car,
+    title: "Consegna e follow-up",
+    description:
+      "Ti riconsegniamo l'auto e restiamo a disposizione per ogni necessità.",
+  },
+];
+
 export function ServicesPage() {
   return (
     <>
@@ -133,7 +162,6 @@ export function ServicesPage() {
         <SectionHeader
           title="I nostri servizi"
           subtitle="Soluzioni complete e tecnologie avanzate per prenderti cura della tua auto."
-          eyebrow="I nostri interventi"
           align="center"
           showLines
         />
@@ -152,8 +180,20 @@ export function ServicesPage() {
           tone="dark"
         />
       </Section>
-
-      <CallToAction />
+      <Section>
+        <SectionHeader
+          title="Come lavoriamo"
+          eyebrow="Dalla prenotazione alla consegna"
+          align="center"
+          showLines
+        />
+        <Steps steps={steps} />
+      </Section>
+      <CallToAction
+        title="Prenota ora il tuo intervento"
+        subtitle="Affidati ai nostri specialisti"
+        icon={CalendarPlus}
+      />
     </>
   );
 }

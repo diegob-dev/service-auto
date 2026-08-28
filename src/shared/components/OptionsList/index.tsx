@@ -26,7 +26,9 @@ export const OptionsList = ({
   variant = "dark",
 }: OptionsListProps) => {
   const containerClassName =
-    variant === "dark" ? "text-secondary-foreground" : " text-foreground";
+    variant === "dark"
+      ? "bg-foreground text-background"
+      : "bg-background text-foreground";
 
   return (
     <div

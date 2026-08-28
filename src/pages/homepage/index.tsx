@@ -108,27 +108,7 @@ export const Homepage = () => {
           ]}
         />
       </Section>
-      <Section tone="light" height="none" fullWidth>
-        <CardTextWithImage
-          eyebrow="Competenza in officina"
-          title={
-            <>
-              Specialisti Volvo, <span className="text-primary">davvero</span>
-            </>
-          }
-          description="Ogni giorno lavoriamo per mantenere alte la qualità e la sicurezza della tua Volvo, con interventi chiari e attenzione per ogni dettaglio."
-          options={[
-            "Tecnici preparati e diagnosi computerizzata",
-            "Ricambi originali e certificati",
-            "Assistenza trasparente e su misura",
-          ]}
-          image={{
-            src: WorkshopSpecialistsImage,
-            alt: "Tecnico specializzato al lavoro su un'auto in officina",
-          }}
-          cta={{ label: "Scopri la nostra officina", to: "/officina" }}
-        />
-      </Section>
+
       <Section tone="light" height="sm">
         <OptionsList
           variant="light"
@@ -154,6 +134,27 @@ export const Homepage = () => {
               icon: <ShieldCheck size={50} />,
             },
           ]}
+        />
+      </Section>
+      <Section tone="dark" height="none" fullWidth>
+        <CardTextWithImage
+          eyebrow="Competenza in officina"
+          title={
+            <>
+              Specialisti Volvo, <span className="text-primary">davvero</span>
+            </>
+          }
+          description="Ogni giorno lavoriamo per mantenere alte la qualità e la sicurezza della tua Volvo, con interventi chiari e attenzione per ogni dettaglio."
+          options={[
+            "Tecnici preparati e diagnosi computerizzata",
+            "Ricambi originali e certificati",
+            "Assistenza trasparente e su misura",
+          ]}
+          image={{
+            src: WorkshopSpecialistsImage,
+            alt: "Tecnico specializzato al lavoro su un'auto in officina",
+          }}
+          cta={{ label: "Scopri la nostra officina", to: "/officina" }}
         />
       </Section>
     </>

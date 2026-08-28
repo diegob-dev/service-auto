@@ -31,8 +31,7 @@ data/*
 *.exe
 *.bat
 *.json
-*.jpg
-*.png
+
 !src/assets/*.png
 !src/assets/workshop-specialists.jpg
 *.txt

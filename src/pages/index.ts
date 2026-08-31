@@ -1,6 +1,6 @@
-export { Homepage } from "./homepage";
-export { CarsPage } from "./cars";
-export { CarDetailsPage } from "./cars/CarDetailsPage";
+export { HomePage } from "./HomePage";
+export { CarsPage } from "./CarsPage";
+export { CarDetailPage } from "./CarDetailPage";
 
 export { WorkshopPage } from "./WorkshopPage";
 export { ServicesPage } from "./ServicesPage";

@@ -4,7 +4,7 @@ import { vi } from "vitest";
 import { HomePage } from "./HomePage";
 
 vi.mock("@/features/cars/hooks", () => ({
-  usePublishedCars: () => ({
+  useFeaturedCars: () => ({
     data: [],
     isLoading: false,
     isError: false,

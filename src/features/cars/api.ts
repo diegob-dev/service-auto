@@ -11,8 +11,11 @@ export function getCarImageUrl(storagePath: string) {
   return data.publicUrl;
 }
 
-export async function getPublishedCars(): Promise<CarWithImages[]> {
-  const { data, error } = await supabase
+export async function getPublishedCars(options?: {
+  featuredOnly?: boolean;
+  limit?: number;
+}): Promise<CarWithImages[]> {
+  let query = supabase
     .from("cars")
     .select(
       `
@@ -31,6 +34,11 @@ export async function getPublishedCars(): Promise<CarWithImages[]> {
     .eq("status", "published")
     .order("featured", { ascending: false })
     .order("created_at", { ascending: false });
+
+  if (options?.featuredOnly) query = query.eq("featured", true);
+  if (options?.limit) query = query.limit(options.limit);
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Impossibile caricare le auto: ${error.message}`);

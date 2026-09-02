@@ -14,14 +14,14 @@ import {
   Wrench,
 } from "lucide-react";
 import { CarsList } from "@/features/cars/CarsList";
-import { usePublishedCars } from "@/features/cars/hooks";
+import { useFeaturedCars } from "@/features/cars/hooks";
 import { Section } from "@/app/layouts/Section";
 import { OptionsList } from "@/components/OptionsList";
 import { CardTextWithImage } from "@/components/CardTextWithImage";
 import { SectionHeader } from "@/components/SectionHeader";
 
 export const HomePage = () => {
-  const { data: cars, isLoading, isError } = usePublishedCars();
+  const { data: cars, isLoading, isError } = useFeaturedCars();
 
   return (
     <>

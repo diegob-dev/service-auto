@@ -30,3 +30,27 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+# Service Auto
+
+## Configurazione Supabase
+
+Le migrazioni creano le tabelle delle auto, le immagini, il bucket `car-image` e le policy RLS collegate a Supabase Auth. Non viene creato alcun account amministratore con credenziali predefinite.
+
+Dopo aver applicato le migrazioni:
+
+1. Crea il primo utente da **Supabase Dashboard → Authentication → Users**.
+2. Promuovilo ad amministratore dal SQL editor, sostituendo l'indirizzo email:
+
+```sql
+update public.admin_profiles
+set role = 'admin', active = true, updated_at = now()
+where email = 'admin@example.com';
+```
+
+La funzione Edge `admin-users` usa la service role esclusivamente lato server per creare, disattivare e aggiornare gli altri account Supabase Auth:
+
+```sh
+npx supabase functions deploy admin-users
+```
+
+Login, rinnovo e persistenza della sessione sono gestiti dal client Supabase Auth. Auto e immagini vengono modificate direttamente dal browser, ma soltanto quando il JWT appartiene a un profilo amministratore attivo secondo le policy RLS.

@@ -40,9 +40,9 @@ describe("CarCard", () => {
   it("mostra un messaggio quando l'auto non ha immagini", () => {
     renderCard(car);
 
-    expect(screen.getByText("Immagine non disponibile"));
+    expect(screen.getByText("Immagine non disponibile")).toBeInTheDocument();
 
-    expect(screen.queryByRole("img")).not.toBeInTheDocument;
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("mostra l'immagine di copertina", () => {

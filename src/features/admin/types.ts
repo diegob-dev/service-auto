@@ -1,8 +1,9 @@
-import type { CarRecord } from "@/features/cars/types";
+import type { CarImageRecord, CarRecord } from "@/features/cars/types";
 
 export type AdminUser = {
   id: string;
-  username: string;
+  email: string;
+  role: "admin";
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -11,4 +12,4 @@ export type AdminUser = {
 export type CarInput = Omit<
   CarRecord,
   "id" | "created_at" | "updated_at"
-> & { id?: string };
+> & { id?: string; car_images?: CarImageRecord[] };

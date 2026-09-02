@@ -8,6 +8,7 @@ import {
   NotFoundPage,
   ServicesPage,
   WorkshopPage,
+  AdminPage,
 } from "../pages";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       <Route path="/auto-usate/:carSlug" element={<CarDetailPage />} />
       <Route path="/chi-siamo" element={<AboutPage />} />
       <Route path="/contatti" element={<ContactPage />} />
+      <Route path="/admin" element={<AdminPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

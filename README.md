@@ -69,3 +69,11 @@ del progetto remoto. `supabase/config.toml` configura soltanto l'istanza locale,
 con il minimo di 6 caratteri: rimuovere i controlli nell'app non modifica la policy
 remota e non garantisce che Supabase accetti password di quattro caratteri.
 
+## Importazione delle foto
+
+`scripts/import-photo-drafts.py` importa il lotto locale descritto da
+`import-auto/2026-09-06/auto-da-completare.json`. Verifica gli hash, usa identificativi
+stabili e crea soltanto bozze; interrompe l'importazione se trova un annuncio già
+pubblicato. Richiede la CLI Supabase autenticata e Python 3. L'archivio fotografico,
+i manifest e i backup rimangono locali e sono esclusi da Git.
+

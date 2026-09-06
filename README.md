@@ -77,3 +77,17 @@ stabili e crea soltanto bozze; interrompe l'importazione se trova un annuncio gi
 pubblicato. Richiede la CLI Supabase autenticata e Python 3. L'archivio fotografico,
 i manifest e i backup rimangono locali e sono esclusi da Git.
 
+## Copertura delle targhe
+
+`scripts/cover-photo-plates.py` applica coperture blu con la scritta SERVICE VIGEVANO
+alle coordinate revisionate del lotto. Richiede Python 3, Pillow, NumPy e il font
+DejaVu Sans Bold. Legge gli originali senza modificarli e produce PNG senza perdita
+in `import-auto/2026-09-06/foto-targhe-python/`, verificando che ogni pixel esterno
+alle maschere rimanga identico. Le coordinate sono specifiche di queste foto:
+nuove immagini richiedono una nuova revisione, comprese le targhe sullo sfondo.
+
+Dopo il controllo visivo, `scripts/publish-covered-photos.py` carica i PNG,
+verifica i file scaricati, aggiorna i riferimenti agli annunci e rimuove le vecchie
+copie dal bucket pubblico. Conserva backup e ricevute locali e controlla che
+numero delle immagini, ordine e copertine rimangano invariati. I nuovi URL evitano
+le precedenti copie nella cache; le chiavi Supabase restano solo in memoria.

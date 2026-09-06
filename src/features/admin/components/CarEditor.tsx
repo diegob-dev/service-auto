@@ -48,7 +48,7 @@ export function CarEditor(props: CarEditorProps) {
             {numberFields.map(([key, label]) => (
               <label key={key} className="text-sm font-semibold">
                 {label}
-                <input className={`${adminInputClass} mt-1`} type="number" min={key === "year" ? 1900 : 0} max={key === "year" ? 2100 : undefined} required={key !== "power_cv"} value={String(value[key] ?? "")} onChange={(event) => set(key, event.target.value === "" ? null : Number(event.target.value))} />
+                <input className={`${adminInputClass} mt-1`} type="number" min={key === "year" ? 1900 : 0} max={key === "year" ? 2100 : undefined} value={String(value[key] ?? "")} onChange={(event) => set(key, event.target.value === "" ? null : Number(event.target.value))} />
               </label>
             ))}
             <label className="text-sm font-semibold">

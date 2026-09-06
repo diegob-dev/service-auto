@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import type { CarWithImages } from "./types";
 import { getCarImageUrl } from "./api";
-import { numberFormatter } from "@/lib/formatters";
+import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
 import { CalendarDays, Fuel, Gauge } from "lucide-react";
 
 export function CarCard({
@@ -42,29 +42,29 @@ export function CarCard({
           {car.brand} {car.model}
         </CardTitle>
 
-        <CardDescription>{car.version ?? car.description}</CardDescription>
+        {car.version?.trim() && <CardDescription>{car.version}</CardDescription>}
       </CardHeader>
       <CardContent>
         <div className="flex flex-row items-center justify-between gap-4">
           <div className="flex flex-row items-end gap-1">
             <CalendarDays size={20} />
-            <p className="text-sm">{car.year}</p>
+            <p className="text-sm">{car.year ?? "—"}</p>
           </div>
           <div className="flex flex-row items-end gap-1">
             <Gauge size={20} />
             <p className="text-sm">
-              {numberFormatter.format(car.kilometers)} km
+              {formatCarKilometers(car.kilometers)}
             </p>
           </div>
           <div className="flex flex-row items-end gap-1">
             <Fuel size={20} />
-            <p className="text-sm">{car.fuel ?? "Non specificato"}</p>
+            <p className="text-sm">{car.fuel?.trim() || "—"}</p>
           </div>
         </div>
       </CardContent>
       <CardFooter className="py-3">
         <p className="text-xl font-semibold text-primary-dark">
-          {numberFormatter.format(car.price)} €
+          {formatCarPrice(car.price)}
         </p>
         <ButtonLink className="w-full uppercase" to={`/auto-usate/${car.slug}`}>
           {buttonText}

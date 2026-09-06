@@ -37,6 +37,20 @@ function renderCard(testCar: CarWithImages) {
 }
 
 describe("CarCard", () => {
+  it("mostra trattini per i dati mancanti e omette le note estese dalle card", () => {
+    renderCard({ ...car, version: null, description: "Note di importazione da completare", year: null, price: null, kilometers: null, fuel: null });
+    expect(screen.getAllByText("—")).toHaveLength(4);
+    expect(screen.queryByText("Note di importazione da completare")).not.toBeInTheDocument();
+    expect(screen.queryByText("0 km")).not.toBeInTheDocument();
+  });
+
+  it("mantiene i chilometri zero reali e la versione disponibile", () => {
+    renderCard({ ...car, kilometers: 0 });
+    expect(screen.getByText("0 km")).toBeInTheDocument();
+    expect(screen.getByText("T6 AWD")).toBeInTheDocument();
+    expect(screen.queryByText("—")).not.toBeInTheDocument();
+  });
+
   it("mostra un messaggio quando l'auto non ha immagini", () => {
     renderCard(car);
 

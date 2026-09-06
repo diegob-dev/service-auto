@@ -7,9 +7,9 @@ export type CarRecord = {
   model: string;
   version: string | null;
   description: string | null;
-  year: number;
-  kilometers: number;
-  price: number;
+  year: number | null;
+  kilometers: number | null;
+  price: number | null;
   fuel: string | null;
   transmission: string | null;
   color: string | null;

@@ -54,3 +54,18 @@ npx supabase functions deploy admin-users
 ```
 
 Login, rinnovo e persistenza della sessione sono gestiti dal client Supabase Auth. Auto e immagini vengono modificate direttamente dal browser, ma soltanto quando il JWT appartiene a un profilo amministratore attivo secondo le policy RLS.
+
+L'accesso e la creazione utenti accettano un username oppure un'email. Gli username
+vengono convertiti internamente in indirizzi tecnici nel dominio riservato
+`admin.service.invalid`; il profilo mantiene il nome inserito e non richiede una
+casella email. Gli account email esistenti continuano a funzionare. Per gli account
+con solo username, un amministratore può cambiare la password dal pannello utenti.
+Per attivare la creazione con username sul server, distribuire nuovamente la
+funzione `admin-users` con il comando indicato sopra.
+
+L'app non impone lunghezze minime o regole di complessità alle password; rimane
+richiesta una password non vuota. Supabase Auth applica separatamente la policy
+del progetto remoto. `supabase/config.toml` configura soltanto l'istanza locale,
+con il minimo di 6 caratteri: rimuovere i controlli nell'app non modifica la policy
+remota e non garantisce che Supabase accetti password di quattro caratteri.
+

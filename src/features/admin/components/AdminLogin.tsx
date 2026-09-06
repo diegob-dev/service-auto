@@ -23,8 +23,8 @@ export function AdminLogin({ onSubmit, busy, error }: AdminLoginProps) {
         <CardContent>
           <form className="space-y-4" onSubmit={onSubmit}>
             <label className="block text-sm font-semibold">
-              Email
-              <input className={`${adminInputClass} mt-1`} name="email" type="email" autoComplete="username" required />
+              Username o email
+              <input className={`${adminInputClass} mt-1`} name="email" type="text" autoComplete="username" required />
             </label>
             <label className="block text-sm font-semibold">
               Password

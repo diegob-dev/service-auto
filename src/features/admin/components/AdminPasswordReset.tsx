@@ -46,7 +46,6 @@ export function AdminPasswordReset({ onSubmit, busy, error }: AdminPasswordReset
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                minLength={8}
                 required
                 autoFocus
               />
@@ -58,7 +57,6 @@ export function AdminPasswordReset({ onSubmit, busy, error }: AdminPasswordReset
                 name="passwordConfirmation"
                 type="password"
                 autoComplete="new-password"
-                minLength={8}
                 required
               />
             </label>

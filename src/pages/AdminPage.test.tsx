@@ -41,7 +41,7 @@ describe("AdminPage", () => {
     renderAdmin();
 
     expect(screen.queryByText(/password vuota/i)).not.toBeInTheDocument();
-    expect(await screen.findByRole("textbox", { name: "Email" })).toBeRequired();
+    expect(await screen.findByRole("textbox", { name: "Username o email" })).toBeRequired();
     expect(screen.getByLabelText("Password")).toBeRequired();
   });
 });

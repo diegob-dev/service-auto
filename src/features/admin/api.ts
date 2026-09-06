@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import type { CarImageRecord, CarRecord, CarWithImages } from "@/features/cars/types";
 import type { AdminUser, CarInput } from "./types";
+import { adminAuthEmail } from "../../../supabase/functions/_shared/admin-identity";
 
 const CAR_IMAGES_BUCKET = "car-image";
 
@@ -22,7 +23,8 @@ async function throwFunctionError(error: { message: string; context?: unknown })
   throw new Error(message);
 }
 
-export async function login(email: string, password: string) {
+export async function login(identifier: string, password: string) {
+  const email = adminAuthEmail(identifier);
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   return dataOrThrow(data.session, error);
 }

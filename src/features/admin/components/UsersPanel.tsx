@@ -26,12 +26,8 @@ export function UsersPanel(props: UsersPanelProps) {
   }
 
   async function changePassword(user: AdminUser) {
-    const password = window.prompt(`Nuova password per ${user.email} (minimo 12 caratteri)`);
+    const password = window.prompt(`Nuova password per ${user.email}`);
     if (password === null) return;
-    if (password.length < 12) {
-      onError("La password deve contenere almeno 12 caratteri");
-      return;
-    }
     try {
       await adminApi.saveUser({ id: user.id, email: user.email, password, active: user.active });
       onError("");
@@ -46,8 +42,8 @@ export function UsersPanel(props: UsersPanelProps) {
         <CardHeader><CardTitle>Nuovo utente</CardTitle></CardHeader>
         <CardContent>
           <form className="space-y-3" onSubmit={onCreate}>
-            <input className={adminInputClass} name="email" type="email" placeholder="Email" required />
-            <input className={adminInputClass} name="password" type="password" minLength={12} placeholder="Password (minimo 12 caratteri)" required />
+            <input className={adminInputClass} name="email" type="text" aria-label="Username o email" placeholder="Username o email" autoComplete="username" required />
+            <input className={adminInputClass} name="password" type="password" aria-label="Password" placeholder="Password" autoComplete="new-password" required />
             <Button type="submit" disabled={busy}>Aggiungi utente</Button>
           </form>
         </CardContent>

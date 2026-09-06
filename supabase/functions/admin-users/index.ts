@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { adminAuthEmail } from "../_shared/admin-identity.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,15 +57,12 @@ Deno.serve(async (request) => {
       active?: boolean;
     };
     const email = String(input?.email ?? "").trim().toLowerCase();
-    if (!email) return json({ error: "Email obbligatoria" }, 400);
-    if (input.password !== undefined && input.password.length < 12) {
-      return json({ error: "La password deve contenere almeno 12 caratteri" }, 400);
-    }
+    if (!email) return json({ error: "Username o email obbligatorio" }, 400);
 
     if (action === "create") {
       if (!input.password) return json({ error: "Password obbligatoria" }, 400);
       const { data, error } = await admin.auth.admin.createUser({
-        email,
+        email: adminAuthEmail(email),
         password: input.password,
         email_confirm: true,
       });
@@ -93,7 +91,7 @@ Deno.serve(async (request) => {
       }
 
       const { error: authUpdateError } = await admin.auth.admin.updateUserById(input.id, {
-        ...(input.password ? { password: input.password } : {}),
+        ...(input.password !== undefined ? { password: input.password } : {}),
         ban_duration: input.active === false ? "876000h" : "none",
       });
       if (authUpdateError) return json({ error: authUpdateError.message }, 400);

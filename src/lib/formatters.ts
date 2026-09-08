@@ -9,7 +9,7 @@ export const numberFormatter = new Intl.NumberFormat("it-IT", {
 });
 
 export const formatCarPrice = (value: number | null | undefined) =>
-  value == null ? "—" : currencyFormatter.format(value);
+  value == null ? "-" : currencyFormatter.format(value);
 
 export const formatCarKilometers = (value: number | null | undefined) =>
-  value == null ? "—" : `${numberFormatter.format(value)} km`;
+  value == null ? "-" : `${numberFormatter.format(value)} km`;

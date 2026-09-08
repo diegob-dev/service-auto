@@ -1,7 +1,15 @@
 import WorkshopImage from "@/assets/workshop-specialists.jpg";
 import { Section } from "@/app/layouts/Section";
 import { ButtonAnchor, ButtonLink } from "@/components/ui/button-link";
-import { Award, CheckCircle2, Clock3, MapPin, Navigation, ShieldCheck, Users } from "lucide-react";
+import {
+  Award,
+  CheckCircle2,
+  Clock3,
+  MapPin,
+  Navigation,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { PageHero } from "@/components/PageHero";
 import { FeatureGrid } from "@/components/FeatureGrid";
 
@@ -94,24 +102,39 @@ export function AboutPage() {
             <p className="text-sm font-semibold tracking-[0.2em] text-primary-dark uppercase">
               Dove siamo
             </p>
-            <h2 id="location-heading" className="mt-3 font-display text-4xl leading-tight tracking-wide uppercase sm:text-5xl">
+            <h2
+              id="location-heading"
+              className="mt-3 font-display text-4xl leading-tight tracking-wide uppercase sm:text-5xl"
+            >
               Ti aspettiamo a Vigevano
             </h2>
             <address className="mt-6 flex items-start gap-3 text-lg not-italic">
-              <MapPin className="mt-1 size-5 shrink-0 text-primary-dark" aria-hidden="true" />
-              <span>Corso Giacomo Brodolini, 32<br />27029 Vigevano (PV)</span>
+              <MapPin
+                className="mt-1 size-5 shrink-0 text-primary-dark"
+                aria-hidden="true"
+              />
+              <span>
+                Corso Giacomo Brodolini, 32
+                <br />
+                27029 Vigevano (PV)
+              </span>
             </address>
 
             <div className="mt-8 rounded-2xl border border-border p-6">
               <h3 className="flex items-center gap-3 text-lg font-semibold">
-                <Clock3 className="size-5 text-primary-dark" aria-hidden="true" />
+                <Clock3
+                  className="size-5 text-primary-dark"
+                  aria-hidden="true"
+                />
                 Orari di apertura
               </h3>
               {/* Orari verificati sulla scheda Google Maps di SERVICE SRL il 6 settembre 2026. */}
               <dl className="mt-4 divide-y divide-border text-sm sm:text-base">
                 <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-3">
                   <dt className="font-medium">Lunedì – Venerdì</dt>
-                  <dd className="text-muted-foreground">08:00–12:00 · 14:00–19:00</dd>
+                  <dd className="text-muted-foreground">
+                    08:00–12:00 · 14:00–19:00
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4 py-3">
                   <dt className="font-medium">Sabato</dt>
@@ -139,7 +162,7 @@ export function AboutPage() {
             <iframe
               title="Mappa di Service SRL — Corso Giacomo Brodolini 32, Vigevano"
               src="https://www.google.com/maps?q=Service+SRL+Corso+Giacomo+Brodolini+32+Vigevano&output=embed"
-              className="block h-80 w-full border-0 sm:h-[480px] lg:h-[540px]"
+              className="block h-80 w-full border-0 sm:h-120 lg:h-135"
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"

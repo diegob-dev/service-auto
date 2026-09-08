@@ -19,7 +19,24 @@ export async function getPublishedCars(options?: {
     .from("cars")
     .select(
       `
-      *,
+      id,
+      slug,
+      brand,
+      model,
+      version,
+      description,
+      year,
+      kilometers,
+      price,
+      fuel,
+      transmission,
+      color,
+      power_cv,
+      optional_features,
+      status,
+      featured,
+      created_at,
+      updated_at,
       car_images (
         id,
         car_id,
@@ -46,6 +63,7 @@ export async function getPublishedCars(options?: {
 
   return (data ?? []).map((car) => ({
     ...car,
+    optional_features: car.optional_features ?? [],
     car_images: [...car.car_images].sort(
       (firstImage, secondImage) => firstImage.position - secondImage.position,
     ),

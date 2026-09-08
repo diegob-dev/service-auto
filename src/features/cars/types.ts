@@ -14,6 +14,8 @@ export type CarRecord = {
   transmission: string | null;
   color: string | null;
   power_cv: number | null;
+  optional_features: string[];
+  license_plate?: string | null;
   status: CarStatus;
   featured: boolean;
   created_at: string;

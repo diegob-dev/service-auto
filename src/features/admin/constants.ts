@@ -16,6 +16,8 @@ export const emptyCar: CarInput = {
   transmission: null,
   color: null,
   power_cv: null,
+  optional_features: [],
+  license_plate: null,
   status: "draft",
   featured: false,
 };

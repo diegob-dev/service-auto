@@ -21,6 +21,7 @@ const car: CarWithImages = {
   transmission: "Automatico",
   color: null,
   power_cv: null,
+  optional_features: [],
   status: "published",
   featured: false,
   created_at: "2026-01-01T00:00:00Z",
@@ -37,9 +38,14 @@ function renderCard(testCar: CarWithImages) {
 }
 
 describe("CarCard", () => {
-  it("mostra trattini per i dati mancanti e omette le note estese dalle card", () => {
+  it("mostra label e testi espliciti per i dati mancanti", () => {
     renderCard({ ...car, version: null, description: "Note di importazione da completare", year: null, price: null, kilometers: null, fuel: null });
-    expect(screen.getAllByText("—")).toHaveLength(4);
+    expect(screen.getByText("Marca e modello")).toBeInTheDocument();
+    expect(screen.getByText("Anno")).toBeInTheDocument();
+    expect(screen.getByText("Chilometri")).toBeInTheDocument();
+    expect(screen.getByText("Alimentazione")).toBeInTheDocument();
+    expect(screen.getByText("Prezzo")).toBeInTheDocument();
+    expect(screen.getAllByText("-")).toHaveLength(4);
     expect(screen.queryByText("Note di importazione da completare")).not.toBeInTheDocument();
     expect(screen.queryByText("0 km")).not.toBeInTheDocument();
   });
@@ -47,8 +53,9 @@ describe("CarCard", () => {
   it("mantiene i chilometri zero reali e la versione disponibile", () => {
     renderCard({ ...car, kilometers: 0 });
     expect(screen.getByText("0 km")).toBeInTheDocument();
+    expect(screen.getByText("Versione")).toBeInTheDocument();
     expect(screen.getByText("T6 AWD")).toBeInTheDocument();
-    expect(screen.queryByText("—")).not.toBeInTheDocument();
+    expect(screen.queryByText("-")).not.toBeInTheDocument();
   });
 
   it("mostra un messaggio quando l'auto non ha immagini", () => {

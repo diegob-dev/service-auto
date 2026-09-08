@@ -5,7 +5,7 @@ import type { CarWithImages } from "@/features/cars/types";
 import { supabase } from "@/lib/supabase";
 import * as adminApi from "../api";
 import { emptyCar } from "../constants";
-import type { AdminUser, CarInput } from "../types";
+import type { AdminUser, CarInput, StaffRole } from "../types";
 
 export type AdminTab = "cars" | "users";
 
@@ -16,17 +16,16 @@ export function useAdminDashboard() {
   const [recoveringPassword, setRecoveringPassword] = useState(false);
   const [cars, setCars] = useState<CarWithImages[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [tab, setTab] = useState<AdminTab>("cars");
   const [carForm, setCarForm] = useState<CarInput | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (role?: StaffRole) => {
     try {
-      const [nextCars, nextUsers] = await Promise.all([
-        adminApi.listCars(),
-        adminApi.listUsers(),
-      ]);
+      const nextCars = await adminApi.listCars();
+      const nextUsers = role === "admin" ? await adminApi.listUsers() : [];
       setCars(nextCars);
       setUsers(nextUsers);
       setError("");
@@ -46,7 +45,9 @@ export function useAdminDashboard() {
         return;
       }
       setSession(nextSession);
-      await refresh();
+      setCurrentUser(profile);
+      setTab("cars");
+      await refresh(profile.role);
     } catch (caught) {
       setSession(null);
       setError(caught instanceof Error ? caught.message : "Verifica account non riuscita");
@@ -64,7 +65,11 @@ export function useAdminDashboard() {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (event === "SIGNED_OUT") setSession(null);
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setCurrentUser(null);
+        setTab("cars");
+      }
       if (event === "PASSWORD_RECOVERY" && nextSession) {
         setSession(nextSession);
         setRecoveringPassword(true);
@@ -100,16 +105,18 @@ export function useAdminDashboard() {
 
   async function saveCar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!carForm) return;
+    if (!carForm) return false;
     setBusy(true);
     setError("");
     try {
       const saved = await adminApi.saveCar(carForm);
       setCarForm({ ...saved, car_images: carForm.car_images ?? [] });
-      await refresh();
+      await refresh(currentUser?.role);
       await invalidateCars();
+      return true;
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Salvataggio non riuscito");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -119,7 +126,7 @@ export function useAdminDashboard() {
     if (!window.confirm("Eliminare definitivamente questa auto?")) return;
     try {
       await adminApi.deleteCar(car);
-      await refresh();
+      await refresh(currentUser?.role);
       await invalidateCars();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Eliminazione non riuscita");
@@ -136,9 +143,10 @@ export function useAdminDashboard() {
         email: String(form.get("email")),
         password: String(form.get("password")),
         active: true,
+        role: form.get("role") === "admin" ? "admin" : "seller",
       });
       event.currentTarget.reset();
-      await refresh();
+      await refresh(currentUser?.role);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Utente non salvato");
     } finally {
@@ -148,7 +156,7 @@ export function useAdminDashboard() {
 
   async function imagesChanged() {
     if (!carForm?.id) return;
-    const nextCars = await refresh();
+    const nextCars = await refresh(currentUser?.role);
     const nextCar = nextCars?.find((car) => car.id === carForm.id);
     if (nextCar) setCarForm({ ...nextCar });
     await invalidateCars();
@@ -159,6 +167,8 @@ export function useAdminDashboard() {
       await adminApi.logout();
     } finally {
       setSession(null);
+      setCurrentUser(null);
+      setTab("cars");
       setCars([]);
       setUsers([]);
     }
@@ -185,6 +195,7 @@ export function useAdminDashboard() {
     recoveringPassword,
     cars,
     users,
+    currentUser,
     tab,
     carForm,
     busy,
@@ -197,7 +208,7 @@ export function useAdminDashboard() {
     deleteCar,
     createUser,
     imagesChanged,
-    refreshCurrent: async () => { await refresh(); },
+    refreshCurrent: async () => { await refresh(currentUser?.role); },
     showCars: () => setTab("cars"),
     showUsers: () => setTab("users"),
     createCar: () => setCarForm({ ...emptyCar }),

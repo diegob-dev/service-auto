@@ -9,9 +9,12 @@ import { useAdminDashboard } from "@/features/admin/hooks/useAdminDashboard";
 
 export function AdminPage() {
   const admin = useAdminDashboard();
+  const isAdmin = admin.currentUser?.role === "admin";
 
   if (admin.checkingAuth) {
-    return <div className="mx-auto max-w-7xl px-4 py-10">Verifica sessione…</div>;
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-10">Verifica sessione…</div>
+    );
   }
 
   if (admin.recoveringPassword) {
@@ -25,17 +28,32 @@ export function AdminPage() {
   }
 
   if (!admin.session) {
-    return <AdminLogin onSubmit={admin.login} busy={admin.busy} error={admin.error} />;
+    return (
+      <AdminLogin
+        onSubmit={admin.login}
+        busy={admin.busy}
+        error={admin.error}
+      />
+    );
   }
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10">
       <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-bold uppercase text-primary">Area riservata</p>
-          <h1 className="font-display text-4xl uppercase">Gestione parco auto</h1>
+          <p className="text-sm font-bold uppercase text-primary">
+            Area riservata
+          </p>
+          <h1 className="font-display text-4xl uppercase">
+            Gestione parco auto
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Accesso come {isAdmin ? "Admin" : "Venditore"}
+          </p>
         </div>
-        <Button variant="outline" onClick={admin.logout}><LogOut /> Esci</Button>
+        <Button variant="outline" onClick={admin.logout}>
+          <LogOut /> Esci
+        </Button>
       </header>
 
       {admin.error && (
@@ -44,23 +62,34 @@ export function AdminPage() {
         </p>
       )}
 
-      <div className="mb-6 flex gap-2">
-        <Button variant={admin.tab === "cars" ? "default" : "outline"} onClick={admin.showCars}>
-          Auto ({admin.cars.length})
-        </Button>
-        <Button variant={admin.tab === "users" ? "default" : "outline"} onClick={admin.showUsers}>
-          <Users /> Utenti ({admin.users.length})
-        </Button>
-      </div>
+      {isAdmin && (
+        <div className="mb-6 flex gap-2">
+          <>
+            <Button
+              variant={admin.tab === "cars" ? "default" : "outline"}
+              onClick={admin.showCars}
+            >
+              Auto ({admin.cars.length})
+            </Button>
+            <Button
+              variant={admin.tab === "users" ? "default" : "outline"}
+              onClick={admin.showUsers}
+            >
+              <Users /> Utenti ({admin.users.length})
+            </Button>
+          </>
+        </div>
+      )}
 
       {admin.tab === "cars" ? (
         <CarsPanel
           cars={admin.cars}
+          showLicensePlate={isAdmin}
           onCreate={admin.createCar}
           onEdit={admin.editCar}
           onDelete={admin.deleteCar}
         />
-      ) : (
+      ) : isAdmin ? (
         <UsersPanel
           users={admin.users}
           busy={admin.busy}
@@ -68,12 +97,13 @@ export function AdminPage() {
           onRefresh={admin.refreshCurrent}
           onError={admin.setError}
         />
-      )}
+      ) : null}
 
       {admin.carForm && (
         <CarEditor
           value={admin.carForm}
           busy={admin.busy}
+          showLicensePlate={isAdmin}
           onChange={admin.updateCarForm}
           onClose={admin.closeCarEditor}
           onSubmit={admin.saveCar}

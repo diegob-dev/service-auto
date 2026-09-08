@@ -7,7 +7,7 @@ export function CarsPage() {
 
   return (
     <Section height="md">
-      <CarsList cars={cars} isLoading={isLoading} isError={isError} />
+      <CarsList cars={cars} isLoading={isLoading} isError={isError} showFilters />
     </Section>
   );
 }

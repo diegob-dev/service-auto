@@ -12,6 +12,8 @@ import { getCarImageUrl } from "./api";
 import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
 import { CalendarDays, Fuel, Gauge } from "lucide-react";
 
+const missingValue = "-";
+
 export function CarCard({
   car,
   buttonText,
@@ -38,34 +40,51 @@ export function CarCard({
         </div>
       )}
       <CardHeader>
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Marca e modello
+        </p>
         <CardTitle>
           {car.brand} {car.model}
         </CardTitle>
 
-        {car.version?.trim() && <CardDescription>{car.version}</CardDescription>}
+        {car.version?.trim() && (
+          <CardDescription className="mt-2">
+            <span className="block text-xs font-semibold uppercase tracking-wide">Versione</span>
+            <span className="mt-0.5 block font-medium text-foreground">{car.version}</span>
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="flex flex-row items-center justify-between gap-4">
-          <div className="flex flex-row items-end gap-1">
-            <CalendarDays size={20} />
-            <p className="text-sm">{car.year ?? "—"}</p>
+        <dl className="grid grid-cols-3 gap-3">
+          <div className="min-w-0">
+            <dt className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <CalendarDays size={16} aria-hidden="true" /> Anno
+            </dt>
+            <dd className="text-sm font-medium">{car.year ?? missingValue}</dd>
           </div>
-          <div className="flex flex-row items-end gap-1">
-            <Gauge size={20} />
-            <p className="text-sm">
-              {formatCarKilometers(car.kilometers)}
-            </p>
+          <div className="min-w-0">
+            <dt className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Gauge size={16} aria-hidden="true" /> Chilometri
+            </dt>
+            <dd className="text-sm font-medium">
+              {car.kilometers == null ? missingValue : formatCarKilometers(car.kilometers)}
+            </dd>
           </div>
-          <div className="flex flex-row items-end gap-1">
-            <Fuel size={20} />
-            <p className="text-sm">{car.fuel?.trim() || "—"}</p>
+          <div className="min-w-0">
+            <dt className="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Fuel size={16} aria-hidden="true" /> Alimentazione
+            </dt>
+            <dd className="text-sm font-medium">{car.fuel?.trim() || missingValue}</dd>
           </div>
-        </div>
+        </dl>
       </CardContent>
       <CardFooter className="py-3">
-        <p className="text-xl font-semibold text-primary-dark">
-          {formatCarPrice(car.price)}
-        </p>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prezzo</p>
+          <p className="mt-0.5 text-xl font-semibold text-primary-dark">
+            {car.price == null ? missingValue : formatCarPrice(car.price)}
+          </p>
+        </div>
         <ButtonLink className="w-full uppercase" to={`/auto-usate/${car.slug}`}>
           {buttonText}
         </ButtonLink>

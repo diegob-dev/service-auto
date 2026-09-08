@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { ImagePlus, Star, Trash2 } from "lucide-react";
+import { ImagePlus, Star, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCarImageUrl } from "@/features/cars/api";
 import * as adminApi from "../api";
@@ -58,37 +58,90 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
   }
 
   return (
-    <section className="mt-8 border-t pt-6">
-      <h3 className="mb-4 flex items-center gap-2 text-lg font-bold"><ImagePlus /> Immagini</h3>
-      {error && <p role="alert" className="mb-3 text-sm text-red-600">{error}</p>}
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-        {car.car_images?.map((image) => (
-          <div key={image.id} className="overflow-hidden rounded-lg border">
-            <img src={getCarImageUrl(image.storage_path)} alt={image.alt} className="aspect-video w-full object-cover" />
-            <div className="flex items-center justify-between gap-2 p-2">
-              <span className="truncate text-xs">{image.is_cover ? "Copertina" : image.alt || "Immagine"}</span>
-              <div className="flex">
-                <Button type="button" variant="ghost" size="icon" disabled={busy || image.is_cover} aria-label="Imposta come copertina" onClick={() => void updateImage("cover", image.id)}><Star /></Button>
-                <Button type="button" variant="ghost" size="icon" disabled={busy} className="text-red-600" aria-label="Elimina immagine" onClick={() => void updateImage("delete", image.id)}><Trash2 /></Button>
-              </div>
-            </div>
-          </div>
-        ))}
+    <section>
+      <div className="mb-5">
+        <h3 className="flex items-center gap-2 text-xl font-bold"><ImagePlus /> Fotografie dell’auto</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          La copertina è la fotografia mostrata nell’elenco delle auto usate.
+        </p>
       </div>
-      <form className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end" onSubmit={upload}>
-        <label className="text-sm font-semibold">
-          File immagine
-          <input className={`${adminInputClass} mt-1`} name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required />
-        </label>
-        <label className="text-sm font-semibold">
-          Testo alternativo
-          <input className={`${adminInputClass} mt-1`} name="alt" placeholder={`${car.brand} ${car.model}`} />
-        </label>
-        <div>
-          <label className="mb-2 flex items-center gap-2 text-sm">
-            <input type="checkbox" name="cover" defaultChecked={!car.car_images?.length} /> Copertina
+
+      {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+
+      {car.car_images?.length ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {car.car_images.map((image) => (
+            <article key={image.id} className={`overflow-hidden rounded-xl border bg-card ${image.is_cover ? "ring-2 ring-primary" : ""}`}>
+              <div className="relative">
+                <img src={getCarImageUrl(image.storage_path)} alt={image.alt} className="aspect-video w-full object-cover" />
+                {image.is_cover && (
+                  <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow">
+                    <Star size={14} className="fill-current" aria-hidden="true" /> Copertina attuale
+                  </span>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={busy}
+                  className="absolute right-2 top-2 bg-black/65 text-white shadow hover:bg-red-600 hover:text-white"
+                  aria-label={`Elimina ${image.alt || "immagine"}`}
+                  title="Elimina fotografia"
+                  onClick={() => void updateImage("delete", image.id)}
+                >
+                  <Trash2 aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="p-3">
+                <p className="truncate text-sm text-muted-foreground">
+                  {image.alt || `${car.brand} ${car.model}`}
+                </p>
+                <label className={`mt-3 flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm font-semibold transition-colors ${image.is_cover ? "border-primary bg-primary/10 text-primary-dark" : "hover:bg-muted"}`}>
+                  <input
+                    type="radio"
+                    name="current-cover"
+                    checked={image.is_cover}
+                    disabled={busy}
+                    aria-label={`Usa come copertina: ${image.alt || "immagine"}`}
+                    onChange={() => {
+                      if (!image.is_cover) void updateImage("cover", image.id);
+                    }}
+                  />
+                  {image.is_cover ? "Copertina selezionata" : "Usa come copertina"}
+                </label>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed p-6 text-center text-muted-foreground">
+          <ImagePlus className="mx-auto mb-2" aria-hidden="true" />
+          <p className="font-semibold text-foreground">Nessuna fotografia caricata</p>
+          <p className="mt-1 text-sm">La prima fotografia verrà usata automaticamente come copertina.</p>
+        </div>
+      )}
+
+      <form className="mt-6 rounded-xl bg-muted p-5" onSubmit={upload}>
+        <h4 className="flex items-center gap-2 font-bold"><Upload size={18} /> Aggiungi una fotografia</h4>
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <label className="text-sm font-semibold">
+            Scegli immagine
+            <input className={`${adminInputClass} mt-1 cursor-pointer`} name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required />
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">JPG, PNG, WebP o AVIF, massimo 10 MB.</span>
           </label>
-          <Button type="submit" disabled={busy}>{busy ? "Caricamento…" : "Carica"}</Button>
+          <label className="text-sm font-semibold">
+            Descrizione dell’immagine
+            <input className={`${adminInputClass} mt-1`} name="alt" placeholder={`${car.brand} ${car.model}`} />
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">Aiuta a descrivere la fotografia anche a chi non può vederla.</span>
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <label className="flex items-center gap-2 text-sm font-semibold">
+            <input type="checkbox" name="cover" defaultChecked={!car.car_images?.length} /> Usa come copertina
+          </label>
+          <Button type="submit" disabled={busy}>
+            <Upload aria-hidden="true" /> {busy ? "Caricamento…" : "Carica fotografia"}
+          </Button>
         </div>
       </form>
     </section>

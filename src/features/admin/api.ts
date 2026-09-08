@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import type { CarImageRecord, CarRecord, CarWithImages } from "@/features/cars/types";
-import type { AdminUser, CarInput } from "./types";
+import { buildCarSlug } from "@/features/cars/slug";
+import type { AdminUser, CarInput, StaffRole } from "./types";
 import { adminAuthEmail } from "../../../supabase/functions/_shared/admin-identity";
 
 const CAR_IMAGES_BUCKET = "car-image";
@@ -49,24 +50,53 @@ export async function getCurrentAdmin() {
     .eq("id", authData.user.id)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data?.role === "admin" && data.active ? data : null;
+  return data && (data.role === "admin" || data.role === "seller") && data.active
+    ? data as AdminUser
+    : null;
 }
 
 export async function listCars() {
-  const { data, error } = await supabase
-    .from("cars")
-    .select("*, car_images(*)")
-    .order("created_at", { ascending: false });
+  const [{ data, error }, { data: privateDetails, error: privateDetailsError }] = await Promise.all([
+    supabase.from("cars").select("*, car_images(*)").order("created_at", { ascending: false }),
+    supabase.from("car_admin_details").select("car_id, license_plate"),
+  ]);
+  if (privateDetailsError) throw new Error(privateDetailsError.message);
   const cars = dataOrThrow(data, error) as CarWithImages[];
+  const licensePlates = new Map(
+    (privateDetails ?? []).map((detail) => [detail.car_id, detail.license_plate]),
+  );
   return cars.map((car) => ({
     ...car,
+    license_plate: licensePlates.get(car.id) ?? null,
+    optional_features: car.optional_features ?? [],
     car_images: [...car.car_images].sort((first, second) => first.position - second.position),
   }));
 }
 
 export async function saveCar(car: CarInput) {
+  const optionalFeatures = car.optional_features
+    .map((feature) => feature.trim())
+    .filter(Boolean);
+  let slug = car.slug;
+  if (!car.id) {
+    const baseSlug = buildCarSlug(car);
+    const { data: existingCars, error: slugError } = await supabase
+      .from("cars")
+      .select("slug")
+      .like("slug", `${baseSlug}%`);
+    if (slugError) throw new Error(slugError.message);
+
+    const existingSlugs = new Set((existingCars ?? []).map(({ slug: existingSlug }) => existingSlug));
+    slug = baseSlug;
+    let suffix = 2;
+    while (existingSlugs.has(slug)) {
+      slug = `${baseSlug}-${suffix}`;
+      suffix += 1;
+    }
+  }
+
   const values = {
-    slug: car.slug,
+    slug,
     brand: car.brand,
     model: car.model,
     version: car.version,
@@ -78,6 +108,7 @@ export async function saveCar(car: CarInput) {
     transmission: car.transmission,
     color: car.color,
     power_cv: car.power_cv,
+    optional_features: [...new Set(optionalFeatures)],
     status: car.status,
     featured: car.featured,
   };
@@ -85,7 +116,21 @@ export async function saveCar(car: CarInput) {
     ? supabase.from("cars").update({ ...values, updated_at: new Date().toISOString() }).eq("id", car.id)
     : supabase.from("cars").insert(values);
   const { data, error } = await query.select().single();
-  return dataOrThrow<CarRecord>(data, error);
+  const saved = dataOrThrow<CarRecord>(data, error);
+  const licensePlate = car.license_plate?.trim().toUpperCase();
+  if (licensePlate) {
+    const { error: licensePlateError } = await supabase
+      .from("car_admin_details")
+      .upsert({ car_id: saved.id, license_plate: licensePlate, updated_at: new Date().toISOString() });
+    if (licensePlateError) throw new Error(licensePlateError.message);
+  } else {
+    const { error: licensePlateError } = await supabase
+      .from("car_admin_details")
+      .delete()
+      .eq("car_id", saved.id);
+    if (licensePlateError) throw new Error(licensePlateError.message);
+  }
+  return { ...saved, license_plate: licensePlate ?? null };
 }
 
 export async function deleteCar(car: CarWithImages) {
@@ -108,8 +153,12 @@ export function listUsers() {
   return invokeUsers<AdminUser[]>({ action: "list" });
 }
 
-export function saveUser(user: { id?: string; email: string; password?: string; active: boolean }) {
+export function saveUser(user: { id?: string; email: string; password?: string; active: boolean; role: StaffRole }) {
   return invokeUsers<AdminUser>({ action: user.id ? "update" : "create", user });
+}
+
+export function deleteUser(userId: string) {
+  return invokeUsers<{ id: string }>({ action: "delete", user: { id: userId } });
 }
 
 export async function uploadCarImage(

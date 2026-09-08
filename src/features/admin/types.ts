@@ -1,9 +1,11 @@
 import type { CarImageRecord, CarRecord } from "@/features/cars/types";
 
+export type StaffRole = "admin" | "seller";
+
 export type AdminUser = {
   id: string;
   email: string;
-  role: "admin";
+  role: StaffRole;
   active: boolean;
   created_at: string;
   updated_at: string;

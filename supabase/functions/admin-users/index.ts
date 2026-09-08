@@ -45,7 +45,6 @@ Deno.serve(async (request) => {
       const { data: profiles, error } = await admin
         .from("admin_profiles")
         .select("id, email, role, active, created_at, updated_at")
-        .eq("role", "admin")
         .order("email");
       return error ? json({ error: error.message }, 400) : json(profiles ?? []);
     }
@@ -55,9 +54,11 @@ Deno.serve(async (request) => {
       email?: string;
       password?: string;
       active?: boolean;
+      role?: "admin" | "seller";
     };
     const email = String(input?.email ?? "").trim().toLowerCase();
-    if (!email) return json({ error: "Username o email obbligatorio" }, 400);
+    const role = input?.role === "admin" ? "admin" : "seller";
+    if (action !== "delete" && !email) return json({ error: "Username o email obbligatorio" }, 400);
 
     if (action === "create") {
       if (!input.password) return json({ error: "Password obbligatoria" }, 400);
@@ -70,7 +71,7 @@ Deno.serve(async (request) => {
 
       const { data: profile, error: profileError } = await admin
         .from("admin_profiles")
-        .upsert({ id: data.user.id, email, role: "admin", active: input.active !== false })
+        .upsert({ id: data.user.id, email, role, active: input.active !== false })
         .select()
         .single();
       if (profileError) {
@@ -81,7 +82,17 @@ Deno.serve(async (request) => {
     }
 
     if (action === "update" && input.id) {
-      if (input.active === false) {
+      const { data: target, error: targetError } = await admin
+        .from("admin_profiles")
+        .select("role, active")
+        .eq("id", input.id)
+        .maybeSingle();
+      if (targetError || !target) return json({ error: targetError?.message ?? "Utente non trovato" }, 404);
+
+      const removesActiveAdmin = target.role === "admin"
+        && target.active
+        && (input.active === false || role !== "admin");
+      if (removesActiveAdmin) {
         const { count } = await admin
           .from("admin_profiles")
           .select("id", { count: "exact", head: true })
@@ -97,11 +108,35 @@ Deno.serve(async (request) => {
       if (authUpdateError) return json({ error: authUpdateError.message }, 400);
       const { data: profile, error } = await admin
         .from("admin_profiles")
-        .update({ active: input.active !== false, updated_at: new Date().toISOString() })
+        .update({ role, active: input.active !== false, updated_at: new Date().toISOString() })
         .eq("id", input.id)
         .select()
         .single();
       return error ? json({ error: error.message }, 400) : json(profile);
+    }
+
+    if (action === "delete" && input.id) {
+      if (input.id === authData.user.id) {
+        return json({ error: "Non puoi eliminare il tuo account" }, 400);
+      }
+      const { data: target, error: targetError } = await admin
+        .from("admin_profiles")
+        .select("role, active")
+        .eq("id", input.id)
+        .maybeSingle();
+      if (targetError || !target) return json({ error: targetError?.message ?? "Utente non trovato" }, 404);
+
+      if (target.role === "admin" && target.active) {
+        const { count } = await admin
+          .from("admin_profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("role", "admin")
+          .eq("active", true);
+        if ((count ?? 0) <= 1) return json({ error: "Non puoi eliminare l'ultimo amministratore" }, 400);
+      }
+
+      const { error } = await admin.auth.admin.deleteUser(input.id);
+      return error ? json({ error: error.message }, 400) : json({ id: input.id });
     }
 
     return json({ error: "Operazione non valida" }, 400);

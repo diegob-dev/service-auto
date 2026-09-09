@@ -40,7 +40,7 @@ describe("CarsList", () => {
       isLoading: true,
       isError: false,
     });
-    expect(screen.getByText("Caricamento...")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Caricamento auto" })).toBeInTheDocument();
 
     rerender(
       <MemoryRouter>
@@ -83,6 +83,8 @@ describe("CarsList", () => {
     renderList({ cars: [car, secondCar], isLoading: false, isError: false, showFilters: true });
 
     expect(screen.getByText("2 auto disponibili")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Mostra filtri" }));
+    expect(screen.getByRole("button", { name: "Nascondi filtri" })).toHaveAttribute("aria-expanded", "true");
     fireEvent.change(screen.getByRole("textbox", { name: "Cerca auto" }), { target: { value: "Fiat" } });
 
     expect(screen.getByText("1 auto disponibile")).toBeInTheDocument();

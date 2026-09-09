@@ -48,6 +48,7 @@ export function FeatureGrid({ features, gap = "auto" }: FeatureGridProps) {
               alt={title}
               className="aspect-video w-full object-cover"
               loading="lazy"
+              decoding="async"
             />
           )}
           <div className="p-7">

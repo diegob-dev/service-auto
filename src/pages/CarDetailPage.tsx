@@ -4,17 +4,61 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { CarGallery } from "@/features/cars/CarGallery";
 import { usePublishedCars } from "@/features/cars/hooks";
 import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 const missingValue = "-";
+
+function CarDetailLoading() {
+  return (
+    <Section height="sm" size="large">
+      <div role="status" aria-label="Caricamento auto" className="w-full animate-pulse">
+        <span className="sr-only">Caricamento dettagli auto in corso…</span>
+        <div className="h-4 w-40 rounded bg-muted" />
+        <div className="mt-8 h-12 max-w-xl rounded bg-muted" />
+        <div className="mt-4 h-8 w-32 rounded bg-muted" />
+        <div className="mt-8 aspect-video max-h-[72vh] w-full rounded-2xl bg-muted" />
+        <div className="mt-5 flex gap-3">
+          <div className="h-10 w-28 rounded-full bg-muted" />
+          <div className="h-10 w-36 rounded-full bg-muted" />
+          <div className="h-10 w-32 rounded-full bg-muted" />
+        </div>
+      </div>
+    </Section>
+  );
+}
 
 export function CarDetailPage() {
   const { carSlug } = useParams();
   const { data: cars, isLoading, isError } = usePublishedCars();
   const car = cars?.find(({ slug }) => slug === carSlug);
 
-  if (isLoading) return <Section height="md">Caricamento...</Section>;
-  if (isError) return <Section height="md">Errore nel caricamento.</Section>;
+  useEffect(() => {
+    if (!car) return;
+    const carName = `${car.brand} ${car.model}`;
+    document.title = `${carName} usata | Service SRL`;
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute(
+        "content",
+        `Scopri fotografie, caratteristiche e disponibilità di ${carName} usata presso Service SRL a Vigevano.`,
+      );
+  }, [car]);
+
+  if (isLoading) return <CarDetailLoading />;
+  if (isError) {
+    return (
+      <Section height="md">
+        <div className="rounded-xl border border-destructive/25 bg-destructive/5 p-6 text-center">
+          <h1 className="text-2xl font-bold">Impossibile caricare l’auto</h1>
+          <p className="mt-2 text-muted-foreground">Riprova tra qualche istante.</p>
+          <ButtonLink className="mt-5" variant="outline" to="/auto-usate">
+            Torna alle auto usate
+          </ButtonLink>
+        </div>
+      </Section>
+    );
+  }
   if (!car) {
     return (
       <Section height="md">
@@ -44,7 +88,7 @@ export function CarDetailPage() {
   ];
 
   return (
-    <Section height="md" size="large">
+    <Section height="sm" size="large">
       <article className="w-full">
         <ButtonLink
           variant="destructive"

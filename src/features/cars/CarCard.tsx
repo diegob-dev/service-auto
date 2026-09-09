@@ -2,7 +2,6 @@ import { ButtonLink } from "@/components/ui/button-link";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -27,12 +26,14 @@ export function CarCard({
   const coverUrl = coverImage ? getCarImageUrl(coverImage.storage_path) : null;
 
   return (
-    <Card className="relative w-full pt-0">
+    <Card className="relative h-full w-full pt-0">
       {coverUrl ? (
         <img
           src={coverUrl}
           alt={coverImage?.alt || `${car.brand} ${car.model}`}
           className="relative z-20 aspect-video w-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
       ) : (
         <div className="flex aspect-video items-center justify-center bg-muted text-muted-foreground">
@@ -43,16 +44,14 @@ export function CarCard({
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Marca e modello
         </p>
-        <CardTitle>
-          {car.brand} {car.model}
+        <CardTitle className="flex flex-wrap items-baseline gap-x-1.5">
+          <span>{car.brand} {car.model}</span>
+          {car.version?.trim() && (
+            <span className="text-sm font-semibold normal-case text-muted-foreground">
+              · {car.version.trim()}
+            </span>
+          )}
         </CardTitle>
-
-        {car.version?.trim() && (
-          <CardDescription className="mt-2">
-            <span className="block text-xs font-semibold uppercase tracking-wide">Versione</span>
-            <span className="mt-0.5 block font-medium text-foreground">{car.version}</span>
-          </CardDescription>
-        )}
       </CardHeader>
       <CardContent>
         <dl className="grid grid-cols-3 gap-3">
@@ -78,7 +77,7 @@ export function CarCard({
           </div>
         </dl>
       </CardContent>
-      <CardFooter className="py-3">
+      <CardFooter className="mt-auto py-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Prezzo</p>
           <p className="mt-0.5 text-xl font-semibold text-primary-dark">

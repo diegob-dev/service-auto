@@ -21,15 +21,15 @@ import { FeatureGrid, type Feature } from "@/components/FeatureGrid";
 import { CallToAction } from "@/components/CallToAction";
 import { SectionHeader } from "@/components/SectionHeader";
 import { IconWithImage } from "@/components/IconWithImage";
-import AutoImage from "@/assets/auto.png";
-import BatterieImage from "@/assets/batterie.png";
-import ClimatizzatoreImage from "@/assets/climatizzatore.png";
-import DiagnosiImage from "@/assets/diagnosi.png";
-import ElettronicaImage from "@/assets/elettronica.png";
-import FreniImage from "@/assets/freno.png";
-import PneumaticiImage from "@/assets/pneumatici.png";
-import PreRevisioneImage from "@/assets/pre-revisione.png";
-import TagliandoImage from "@/assets/tagliando.png";
+import AutoImage from "@/assets/auto.webp";
+import BatterieImage from "@/assets/batterie.webp";
+import ClimatizzatoreImage from "@/assets/climatizzatore.webp";
+import DiagnosiImage from "@/assets/diagnosi.webp";
+import ElettronicaImage from "@/assets/elettronica.webp";
+import FreniImage from "@/assets/freno.webp";
+import PneumaticiImage from "@/assets/pneumatici.webp";
+import PreRevisioneImage from "@/assets/pre-revisione.webp";
+import TagliandoImage from "@/assets/tagliando.webp";
 import { Steps, type Step } from "@/components/Steps";
 
 const services: Feature[] = [

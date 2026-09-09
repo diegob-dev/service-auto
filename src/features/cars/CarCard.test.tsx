@@ -53,9 +53,17 @@ describe("CarCard", () => {
   it("mantiene i chilometri zero reali e la versione disponibile", () => {
     renderCard({ ...car, kilometers: 0 });
     expect(screen.getByText("0 km")).toBeInTheDocument();
-    expect(screen.getByText("Versione")).toBeInTheDocument();
-    expect(screen.getByText("T6 AWD")).toBeInTheDocument();
+    expect(screen.queryByText("Versione")).not.toBeInTheDocument();
+    expect(screen.getByText(/T6 AWD/)).toBeInTheDocument();
     expect(screen.queryByText("-")).not.toBeInTheDocument();
+  });
+
+  it("mantiene il pulsante allineato in fondo alla card", () => {
+    renderCard(car);
+
+    const button = screen.getByRole("link", { name: "Scopri di più" });
+    expect(button.closest('[data-slot="card-footer"]')).toHaveClass("mt-auto");
+    expect(button.closest('[data-slot="card"]')).toHaveClass("h-full");
   });
 
   it("mostra un messaggio quando l'auto non ha immagini", () => {

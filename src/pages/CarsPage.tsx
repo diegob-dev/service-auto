@@ -6,8 +6,13 @@ export function CarsPage() {
   const { data: cars, isLoading, isError } = usePublishedCars();
 
   return (
-    <Section height="md">
-      <CarsList cars={cars} isLoading={isLoading} isError={isError} showFilters />
+    <Section height="sm">
+      <CarsList
+        cars={cars}
+        isLoading={isLoading}
+        isError={isError}
+        showFilters
+      />
     </Section>
   );
 }

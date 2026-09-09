@@ -77,7 +77,7 @@ export function Footer() {
                   className="mt-0.5 size-5 shrink-0 text-primary"
                   aria-hidden="true"
                 />
-                <span>Contattaci per conoscere gli orari</span>
+                <span>Lun–Ven: 08:00–12:00 · 14:00–19:00</span>
               </li>
             </ul>
           </div>

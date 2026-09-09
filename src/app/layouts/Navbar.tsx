@@ -31,7 +31,7 @@ export const Navbar = () => {
         className="flex items-center justify-between gap-4"
       >
         <Logo />
-        <NavigationMenuList className="hidden lg:flex">
+        <NavigationMenuList className="hidden min-[1180px]:flex">
           {NAV_LINKS.map((link) => (
             <NavigationMenuItem key={link.href}>
               <NavigationMenuLink
@@ -43,28 +43,41 @@ export const Navbar = () => {
             </NavigationMenuItem>
           ))}
         </NavigationMenuList>
-        <div className="hidden items-center justify-end gap-2 text-background uppercase font-bold lg:flex">
+        <div className="hidden items-center justify-end gap-2 text-background uppercase font-bold min-[1180px]:flex">
           <ButtonAnchor variant="default" size="lg" href={phoneHref}>
             <Phone className="mr-1" />
             Contattaci
           </ButtonAnchor>
         </div>
-        <Button
-          className="lg:hidden"
-          variant="ghost"
-          size="icon-lg"
-          aria-label={isMenuOpen ? "Chiudi menu" : "Apri menu"}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-navigation"
-          onClick={() => setIsMenuOpen((open) => !open)}
-        >
-          {isMenuOpen ? <X /> : <Menu />}
-        </Button>
+        <div className="flex items-center gap-2 min-[1180px]:hidden">
+          <Link
+            to="/auto-usate"
+            className={`hidden rounded-lg px-3 py-2 text-sm font-bold uppercase transition-colors hover:bg-white/10 sm:inline-flex ${
+              isActive("/auto-usate") ? "text-primary" : "text-background"
+            }`}
+          >
+            Auto usate
+          </Link>
+          <ButtonAnchor className="hidden md:inline-flex" variant="default" size="sm" href={phoneHref}>
+            <Phone aria-hidden="true" /> Chiama
+          </ButtonAnchor>
+          <Button
+            className="rounded-full border border-white/15 text-background hover:bg-white/10 hover:text-background aria-expanded:bg-white/10 aria-expanded:text-background"
+            variant="ghost"
+            size="icon-lg"
+            aria-label={isMenuOpen ? "Chiudi menu" : "Apri menu"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsMenuOpen((open) => !open)}
+          >
+            {isMenuOpen ? <X /> : <Menu />}
+          </Button>
+        </div>
       </Container>
       {isMenuOpen && (
         <div
           id="mobile-navigation"
-          className="absolute inset-x-0 top-full border-t border-muted-foreground/30 bg-foreground p-4 shadow-lg lg:hidden"
+          className="absolute inset-x-0 top-full border-t border-white/10 bg-foreground/98 p-4 shadow-xl backdrop-blur-sm md:left-auto md:w-96 md:border-l min-[1180px]:hidden"
         >
           <nav aria-label="Navigazione mobile" className="flex flex-col gap-1">
             {NAV_LINKS.map((link) => (

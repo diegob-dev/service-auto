@@ -54,21 +54,21 @@ export const SectionHeader = ({
         </p>
       )}
       {showLines ? (
-        <div className="mt-3 flex w-full items-center gap-4 sm:gap-6">
+        <div className="mt-3 flex min-w-0 w-full items-center gap-4 sm:gap-6">
           <span
             aria-hidden="true"
-            className="h-0.5 min-w-8 flex-1 bg-primary"
+            className="hidden h-0.5 min-w-8 flex-1 bg-primary sm:block"
           />
 
           <h2
-            className={`shrink-0 font-display text-4xl tracking-wide uppercase sm:text-5xl ${textStyle[align]}`}
+            className={`min-w-0 flex-1 font-display text-3xl tracking-wide uppercase sm:shrink-0 sm:flex-none sm:text-5xl ${textStyle[align]}`}
           >
             {title}
           </h2>
 
           <span
             aria-hidden="true"
-            className="h-0.5 min-w-8 flex-1 bg-primary"
+            className="hidden h-0.5 min-w-8 flex-1 bg-primary sm:block"
           />
         </div>
       ) : (

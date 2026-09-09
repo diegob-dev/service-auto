@@ -26,4 +26,21 @@ describe("CarGallery", () => {
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+
+  it("chiude la visualizzazione cliccando fuori dalla foto", () => {
+    render(<CarGallery images={images} carName="Volvo XC60" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Apri Vista frontale a tutto schermo" }));
+    const dialog = screen.getByRole("dialog", { name: "Fotografia a tutto schermo di Volvo XC60" });
+    const fullscreenImage = within(dialog).getByRole("img", { name: "Vista frontale" });
+
+    fireEvent.click(fullscreenImage);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+    const emptyGalleryArea = dialog.querySelector("figure");
+    expect(emptyGalleryArea).not.toBeNull();
+    fireEvent.click(emptyGalleryArea!);
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });

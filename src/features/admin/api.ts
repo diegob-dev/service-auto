@@ -112,35 +112,24 @@ export async function saveCar(car: CarInput) {
     status: car.status,
     featured: car.featured,
   };
-  const query = car.id
-    ? supabase.from("cars").update({ ...values, updated_at: new Date().toISOString() }).eq("id", car.id)
-    : supabase.from("cars").insert(values);
-  const { data, error } = await query.select().single();
-  const saved = dataOrThrow<CarRecord>(data, error);
-  const licensePlate = car.license_plate?.trim().toUpperCase();
-  if (licensePlate) {
-    const { error: licensePlateError } = await supabase
-      .from("car_admin_details")
-      .upsert({ car_id: saved.id, license_plate: licensePlate, updated_at: new Date().toISOString() });
-    if (licensePlateError) throw new Error(licensePlateError.message);
-  } else {
-    const { error: licensePlateError } = await supabase
-      .from("car_admin_details")
-      .delete()
-      .eq("car_id", saved.id);
-    if (licensePlateError) throw new Error(licensePlateError.message);
-  }
-  return { ...saved, license_plate: licensePlate ?? null };
+  const { data, error } = await supabase.rpc("staff_save_car", {
+    p_car: {
+      ...values,
+      id: car.id,
+      license_plate: car.license_plate,
+    },
+  });
+  return dataOrThrow<CarRecord & { license_plate: string | null }>(data, error);
 }
 
 export async function deleteCar(car: CarWithImages) {
   const paths = car.car_images.map((image) => image.storage_path);
-  if (paths.length) {
-    const { error } = await supabase.storage.from(CAR_IMAGES_BUCKET).remove(paths);
-    if (error) throw new Error(error.message);
-  }
   const { error } = await supabase.from("cars").delete().eq("id", car.id);
   if (error) throw new Error(error.message);
+  if (paths.length) {
+    const { error: storageError } = await supabase.storage.from(CAR_IMAGES_BUCKET).remove(paths);
+    if (storageError) throw new Error(`Auto eliminata, ma alcune immagini non sono state ripulite: ${storageError.message}`);
+  }
 }
 
 async function invokeUsers<T>(body: Record<string, unknown>) {
@@ -169,6 +158,7 @@ export async function uploadCarImage(
 ) {
   const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
   const storagePath = `${carId}/${crypto.randomUUID()}-${safeName}`;
+  let imageInserted = false;
   const { error: uploadError } = await supabase.storage
     .from(CAR_IMAGES_BUCKET)
     .upload(storagePath, file, { contentType: file.type, upsert: false });
@@ -182,10 +172,6 @@ export async function uploadCarImage(
       .order("position", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (isCover) {
-      const { error } = await supabase.from("car_images").update({ is_cover: false }).eq("car_id", carId);
-      if (error) throw error;
-    }
     const { data, error } = await supabase
       .from("car_images")
       .insert({
@@ -193,37 +179,37 @@ export async function uploadCarImage(
         storage_path: storagePath,
         alt,
         position: (lastImage?.position ?? -1) + 1,
-        is_cover: isCover,
+        is_cover: false,
       })
       .select()
       .single();
-    return dataOrThrow<CarImageRecord>(data, error);
+    const inserted = dataOrThrow<CarImageRecord>(data, error);
+    imageInserted = true;
+    if (!isCover) return inserted;
+    return await setCoverImage(inserted);
   } catch (error) {
-    await supabase.storage.from(CAR_IMAGES_BUCKET).remove([storagePath]);
+    // Se il record esiste, conserva anche il file: una selezione copertina
+    // fallita non deve creare un riferimento rotto nel database.
+    if (!imageInserted) {
+      await supabase.storage.from(CAR_IMAGES_BUCKET).remove([storagePath]);
+    }
     throw error instanceof Error ? error : new Error("Immagine non salvata");
   }
 }
 
 export async function setCoverImage(image: CarImageRecord) {
-  const { error: clearError } = await supabase
-    .from("car_images")
-    .update({ is_cover: false })
-    .eq("car_id", image.car_id);
-  if (clearError) throw new Error(clearError.message);
-  const { data, error } = await supabase
-    .from("car_images")
-    .update({ is_cover: true })
-    .eq("id", image.id)
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("staff_set_car_cover", {
+    p_car_id: image.car_id,
+    p_image_id: image.id,
+  });
   return dataOrThrow<CarImageRecord>(data, error);
 }
 
 export async function deleteCarImage(image: CarImageRecord) {
+  const { error } = await supabase.from("car_images").delete().eq("id", image.id);
+  if (error) throw new Error(error.message);
   const { error: storageError } = await supabase.storage
     .from(CAR_IMAGES_BUCKET)
     .remove([image.storage_path]);
-  if (storageError) throw new Error(storageError.message);
-  const { error } = await supabase.from("car_images").delete().eq("id", image.id);
-  if (error) throw new Error(error.message);
+  if (storageError) throw new Error(`Immagine rimossa dall'auto, ma il file non è stato ripulito: ${storageError.message}`);
 }

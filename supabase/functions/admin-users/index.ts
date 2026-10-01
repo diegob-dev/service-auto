@@ -89,6 +89,13 @@ Deno.serve(async (request) => {
         .maybeSingle();
       if (targetError || !target) return json({ error: targetError?.message ?? "Utente non trovato" }, 404);
 
+      if (
+        input.id === authData.user.id
+        && (input.active === false || role !== "admin")
+      ) {
+        return json({ error: "Non puoi rimuovere il tuo accesso amministratore" }, 400);
+      }
+
       const removesActiveAdmin = target.role === "admin"
         && target.active
         && (input.active === false || role !== "admin");
@@ -101,18 +108,31 @@ Deno.serve(async (request) => {
         if ((count ?? 0) <= 1) return json({ error: "Non puoi disattivare l'ultimo amministratore" }, 400);
       }
 
-      const { error: authUpdateError } = await admin.auth.admin.updateUserById(input.id, {
-        ...(input.password !== undefined ? { password: input.password } : {}),
-        ban_duration: input.active === false ? "876000h" : "none",
-      });
-      if (authUpdateError) return json({ error: authUpdateError.message }, 400);
       const { data: profile, error } = await admin
         .from("admin_profiles")
         .update({ role, active: input.active !== false, updated_at: new Date().toISOString() })
         .eq("id", input.id)
         .select()
         .single();
-      return error ? json({ error: error.message }, 400) : json(profile);
+      if (error) return json({ error: error.message }, 400);
+
+      const { error: authUpdateError } = await admin.auth.admin.updateUserById(input.id, {
+        ...(input.password !== undefined ? { password: input.password } : {}),
+        ban_duration: input.active === false ? "876000h" : "none",
+      });
+      if (authUpdateError) {
+        const { error: rollbackError } = await admin
+          .from("admin_profiles")
+          .update({
+            role: target.role,
+            active: target.active,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", input.id);
+        const suffix = rollbackError ? `; ripristino profilo non riuscito: ${rollbackError.message}` : "";
+        return json({ error: `${authUpdateError.message}${suffix}` }, 400);
+      }
+      return json(profile);
     }
 
     if (action === "delete" && input.id) {

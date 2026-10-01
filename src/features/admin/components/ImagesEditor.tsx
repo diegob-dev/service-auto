@@ -34,6 +34,11 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
       await onChanged();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Caricamento non riuscito");
+      try {
+        await onChanged();
+      } catch {
+        // Conserva l'errore originale, ma mostra l'immagine se era già salvata.
+      }
     } finally {
       setBusy(false);
     }
@@ -52,6 +57,11 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
       await onChanged();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Aggiornamento non riuscito");
+      try {
+        await onChanged();
+      } catch {
+        // Conserva l'errore originale, ma riallinea la UI quando possibile.
+      }
     } finally {
       setBusy(false);
     }

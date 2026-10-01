@@ -81,7 +81,9 @@ def main() -> None:
                 "optional_features",
             )
         }
-        car_payload.update({"status": "published", "featured": False})
+        # Non rendere visibile un annuncio finché tutte le fotografie non sono
+        # state caricate e verificate.
+        car_payload.update({"status": "draft", "featured": False})
         api(
             "/rest/v1/cars?on_conflict=id",
             "POST",
@@ -124,6 +126,12 @@ def main() -> None:
         )
         if len(saved) != len(images) or sum(bool(item["is_cover"]) for item in saved) != 1:
             raise RuntimeError(f'{car["brand"]} {car["model"]}: verifica immagini fallita')
+
+        api(
+            f"/rest/v1/cars?id=eq.{car_id}",
+            "PATCH",
+            {"status": "published"},
+        )
 
         item = {
             "id": car_id,

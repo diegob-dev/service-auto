@@ -17,6 +17,9 @@ LABEL_HEIGHT = 30
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     files = sorted(SOURCE.glob("*.jpeg"))
+    if not files:
+        print("No JPEG images found; no contact sheets created.")
+        return
     font = ImageFont.load_default(size=18)
     page_size = (COLUMNS * THUMBNAIL[0], ROWS * (THUMBNAIL[1] + LABEL_HEIGHT))
 

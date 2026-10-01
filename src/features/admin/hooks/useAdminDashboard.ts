@@ -130,6 +130,8 @@ export function useAdminDashboard() {
       await invalidateCars();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Eliminazione non riuscita");
+      await refresh(currentUser?.role);
+      await invalidateCars();
     }
   }
 

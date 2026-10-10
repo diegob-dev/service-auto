@@ -55,6 +55,9 @@ function productionMetadata(siteUrl: string, indexable: boolean): Plugin {
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
+  if (mode === "production" && (!env.VITE_SUPABASE_URL?.trim() || !env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim())) {
+    throw new Error("Configurare VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY nell'ambiente di build prima di pubblicare.");
+  }
   const cloudflareBranch = process.env.CF_PAGES_BRANCH;
   const indexable = mode === "production" && env.VITE_SITE_INDEXABLE !== "false"
     && (!cloudflareBranch || ["front-end", "frontend"].includes(cloudflareBranch));

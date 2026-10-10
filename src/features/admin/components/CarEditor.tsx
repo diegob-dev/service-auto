@@ -10,7 +10,6 @@ import { buildCarSlug } from "@/features/cars/slug";
 type CarEditorProps = {
   value: CarInput;
   busy: boolean;
-  showLicensePlate: boolean;
   onChange: (value: CarInput) => void;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
@@ -19,10 +18,21 @@ type CarEditorProps = {
 
 const textFields: Array<[keyof CarInput, string]> = [
   ["brand", "Marca"], ["model", "Modello"], ["version", "Versione"],
-  ["license_plate", "Targa (solo admin)"],
-  ["fuel", "Alimentazione"],
-  ["transmission", "Cambio"], ["color", "Colore"],
+  ["license_plate", "Targa"],
+  ["color", "Colore"],
 ];
+
+const fuelOptions = [
+  "Benzina",
+  "Diesel",
+  "Benzina/GPL",
+  "Benzina/Metano",
+  "Ibrida benzina",
+  "Ibrida diesel",
+  "Elettrica",
+] as const;
+
+const transmissionOptions = ["Manuale", "Automatico"] as const;
 
 const numberFields = [
   ["year", "Anno"], ["kilometers", "Chilometri"],
@@ -30,7 +40,7 @@ const numberFields = [
 ] as const;
 
 export function CarEditor(props: CarEditorProps) {
-  const { value, busy, showLicensePlate, onChange, onClose, onSubmit, onImagesChanged } = props;
+  const { value, busy, onChange, onClose, onSubmit, onImagesChanged } = props;
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const formRef = useRef<HTMLFormElement>(null);
   const set = (key: keyof CarInput, next: unknown) => onChange({ ...value, [key]: next });
@@ -96,13 +106,48 @@ export function CarEditor(props: CarEditorProps) {
         {step < 3 && (
           <form ref={formRef} onSubmit={handleFormSubmit}>
             <div hidden={step !== 1} className="grid gap-4 md:grid-cols-2">
+            <p className="text-sm text-muted-foreground md:col-span-2">
+              I campi contrassegnati con <span className="font-bold text-red-600">*</span> sono obbligatori.
+            </p>
             {textFields.map(([key, label]) => (
-              key === "license_plate" && !showLicensePlate ? null :
               <label key={key} className="text-sm font-semibold">
                 {label}
+                {(key === "brand" || key === "model") && (
+                  <span className="ml-1 text-red-600" aria-hidden="true">*</span>
+                )}
                 <input className={`${adminInputClass} mt-1`} value={String(value[key] ?? "")} required={key === "brand" || key === "model"} onChange={(event) => set(key, event.target.value || null)} />
               </label>
             ))}
+            <label className="text-sm font-semibold">
+              Alimentazione
+              <select
+                className={`${adminInputClass} mt-1`}
+                value={value.fuel ?? ""}
+                onChange={(event) => set("fuel", event.target.value || null)}
+              >
+                <option value="">Non specificata</option>
+                {value.fuel && !fuelOptions.includes(value.fuel as typeof fuelOptions[number]) && (
+                  <option value={value.fuel}>{value.fuel} (valore esistente)</option>
+                )}
+                {fuelOptions.map((fuel) => <option key={fuel} value={fuel}>{fuel}</option>)}
+              </select>
+            </label>
+            <label className="text-sm font-semibold">
+              Cambio
+              <select
+                className={`${adminInputClass} mt-1`}
+                value={value.transmission ?? ""}
+                onChange={(event) => set("transmission", event.target.value || null)}
+              >
+                <option value="">Non specificato</option>
+                {value.transmission && !transmissionOptions.includes(value.transmission as typeof transmissionOptions[number]) && (
+                  <option value={value.transmission}>{value.transmission} (valore esistente)</option>
+                )}
+                {transmissionOptions.map((transmission) => (
+                  <option key={transmission} value={transmission}>{transmission}</option>
+                ))}
+              </select>
+            </label>
             {numberFields.map(([key, label]) => (
               <label key={key} className="text-sm font-semibold">
                 {label}
@@ -179,7 +224,7 @@ export function CarEditor(props: CarEditorProps) {
                   {[
                     ["Marca e modello", `${value.brand} ${value.model}`],
                     ["Versione", value.version || "-"],
-                    ...(showLicensePlate ? [["Targa", value.license_plate || "-"]] : []),
+                    ["Targa", value.license_plate || "-"],
                     ["Anno", value.year ?? "-"],
                     ["Chilometri", value.kilometers == null ? "-" : `${value.kilometers.toLocaleString("it-IT")} km`],
                     ["Prezzo", value.price == null ? "-" : `${value.price.toLocaleString("it-IT")} €`],

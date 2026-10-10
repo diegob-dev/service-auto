@@ -9,3 +9,11 @@ export function adminAuthEmail(identifier: string): string {
   ).join("");
   return `${encoded}@admin.service.invalid`;
 }
+
+export function recoveryEmail(identifier: string): string {
+  const email = identifier.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith(".invalid")) {
+    throw new Error("Inserisci un indirizzo email reale associato all’account.");
+  }
+  return email;
+}

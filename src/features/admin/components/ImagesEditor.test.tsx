@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as adminApi from "../api";
 import type { CarInput } from "../types";
 import { ImagesEditor } from "./ImagesEditor";
 
@@ -37,6 +38,33 @@ const car: CarInput & { id: string } = {
 };
 
 describe("ImagesEditor", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("aggiorna le foto e svuota il modulo dopo un caricamento asincrono riuscito", async () => {
+    vi.mocked(adminApi.uploadCarImage).mockResolvedValue({} as never);
+    const onChanged = vi.fn(async () => undefined);
+    render(<ImagesEditor car={car} onChanged={onChanged} />);
+    const input = screen.getByLabelText(/Scegli immagine/) as HTMLInputElement;
+    const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
+    fireEvent.change(input, { target: { files: [file] } });
+    const form = input.form!;
+    const reset = vi.spyOn(form, "reset");
+    const NativeFormData = globalThis.FormData;
+    vi.spyOn(globalThis, "FormData").mockImplementation(function (element) {
+      const data = new NativeFormData(element);
+      data.set("image", file);
+      return data;
+    });
+    try {
+      fireEvent.submit(form);
+      await waitFor(() => expect(onChanged).toHaveBeenCalledOnce());
+      expect(reset).toHaveBeenCalledOnce();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    } finally {
+      vi.restoreAllMocks();
+    }
+  });
+
   it("distingue chiaramente la copertina dalle altre fotografie", () => {
     render(<ImagesEditor car={car} onChanged={vi.fn(async () => undefined)} />);
 

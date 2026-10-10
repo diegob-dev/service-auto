@@ -1,36 +1,20 @@
-# React + TypeScript + Vite
+# Service Auto
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Sito vetrina e catalogo auto con area riservata, sviluppato con React, TypeScript,
+Vite e Supabase. La preparazione della consegna è descritta in [PRODUZIONE.md](PRODUZIONE.md).
 
-Currently, two official plugins are available:
+## Sviluppo e verifiche
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Copia `.env.example` in `.env` e configura le chiavi pubbliche del progetto.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+npm ci
+npm run dev
+npm run build
+npm run lint
+npm test
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
-# Service Auto
 
 ## Configurazione Supabase
 
@@ -55,13 +39,25 @@ npx supabase functions deploy admin-users
 
 Login, rinnovo e persistenza della sessione sono gestiti dal client Supabase Auth. Auto e immagini vengono modificate direttamente dal browser, ma soltanto quando il JWT appartiene a un profilo amministratore attivo secondo le policy RLS.
 
-L'accesso e la creazione utenti accettano un username oppure un'email. Gli username
-vengono convertiti internamente in indirizzi tecnici nel dominio riservato
-`admin.service.invalid`; il profilo mantiene il nome inserito e non richiede una
-casella email. Gli account email esistenti continuano a funzionare. Per gli account
-con solo username, un amministratore può cambiare la password dal pannello utenti.
-Per attivare la creazione con username sul server, distribuire nuovamente la
-funzione `admin-users` con il comando indicato sopra.
+Il login continua ad accettare username per gli account esistenti oppure email.
+Gli username legacy vengono convertiti in indirizzi tecnici nel dominio riservato
+`admin.service.invalid`. I nuovi account richiedono un'email reale, verificata
+anche dalla funzione server, per consentire il recupero password. Ogni utente
+autenticato può cambiare esclusivamente la propria password dall'area riservata;
+gli amministratori non possono impostare la password degli altri account.
+Distribuire nuovamente `admin-users` per applicare il requisito anche sul server.
+
+Dal login, **Password dimenticata?** invia un link all'email dell'account. Il link
+torna a `/admin`, dove l'utente sceglie e conferma la nuova password. Al termine
+la sessione viene chiusa. Configurare sul progetto Supabase remoto il Site URL
+`https://servicevigevano.store` e il redirect consentito
+`https://servicevigevano.store/admin`. I redirect di anteprima vanno autorizzati
+singolarmente quando servono per il collaudo.
+Configurare e verificare il servizio SMTP nella dashboard Supabase prima di
+considerare collaudato l'invio. `supabase/config.toml` modifica solo l'ambiente locale.
+Gli account legacy con username non hanno una casella e richiedono prima
+l'associazione di un indirizzo reale, mantenendo invariati ID, ruolo e stato.
+Non associare email a utenti senza aver verificato chi ne è il proprietario.
 
 L'app non impone lunghezze minime o regole di complessità alle password; rimane
 richiesta una password non vuota. Supabase Auth applica separatamente la policy

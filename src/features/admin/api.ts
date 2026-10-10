@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import type { CarImageRecord, CarRecord, CarWithImages } from "@/features/cars/types";
 import { buildCarSlug } from "@/features/cars/slug";
 import type { AdminUser, CarInput, StaffRole } from "./types";
-import { adminAuthEmail } from "../../../supabase/functions/_shared/admin-identity";
+import { adminAuthEmail, recoveryEmail } from "../../../supabase/functions/_shared/admin-identity";
 
 const CAR_IMAGES_BUCKET = "car-image";
 
@@ -71,6 +71,14 @@ export async function listCars() {
     optional_features: car.optional_features ?? [],
     car_images: [...car.car_images].sort((first, second) => first.position - second.position),
   }));
+}
+
+export async function requestPasswordReset(identifier: string) {
+  const email = recoveryEmail(identifier);
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/admin`,
+  });
+  if (error) throw new Error(error.message);
 }
 
 export async function saveCar(car: CarInput) {
@@ -143,7 +151,8 @@ export function listUsers() {
 }
 
 export function saveUser(user: { id?: string; email: string; password?: string; active: boolean; role: StaffRole }) {
-  return invokeUsers<AdminUser>({ action: user.id ? "update" : "create", user });
+  const values = user.id ? user : { ...user, email: recoveryEmail(user.email) };
+  return invokeUsers<AdminUser>({ action: user.id ? "update" : "create", user: values });
 }
 
 export function deleteUser(userId: string) {

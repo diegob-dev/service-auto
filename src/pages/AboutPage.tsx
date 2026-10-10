@@ -16,7 +16,7 @@ export function AboutPage() {
   return (
     <>
       <PageHero
-        eyebrow="Service SRL"
+        eyebrow="SERVICE SRL"
         title={
           <>
             Competenza che diventa <span className="text-primary">fiducia</span>
@@ -34,7 +34,7 @@ export function AboutPage() {
           <div className="relative overflow-hidden rounded-2xl">
             <img
               src={WorkshopImage}
-              alt="Tecnico al lavoro all'interno dell'officina Service SRL"
+              alt="Tecnico al lavoro all'interno dell'officina SERVICE SRL"
               className="aspect-4/3 size-full object-cover object-[68%_center]"
               loading="lazy"
             />

@@ -2,6 +2,7 @@ import { NAV_LINKS, PHONE_NUMBER } from "@/lib/constants";
 import { Clock3, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Container } from "./Container";
+import { COMPANY } from "@/lib/company";
 
 export function Footer() {
   const phoneHref = `tel:${PHONE_NUMBER.replace(/\s/g, "")}`;
@@ -14,14 +15,19 @@ export function Footer() {
           <div className="max-w-md">
             <Link
               to="/"
-              aria-label="Service SRL - Home"
+              aria-label="SERVICE SRL - Home"
               className="font-display text-3xl uppercase tracking-wide text-background"
             >
-              Service SRL
+              {COMPANY.name}
             </Link>
             <p className="mt-4 leading-relaxed text-secondary-foreground/70">
               Officina specializzata Volvo e auto usate selezionate, con
               competenza, trasparenza e attenzione per ogni cliente.
+            </p>
+            <p className="mt-4 text-sm leading-relaxed text-secondary-foreground/70">
+              P. IVA {COMPANY.vatNumber}<br />
+              Sede legale: {COMPANY.address}<br />
+              <a href={`mailto:${COMPANY.email}`} className="hover:underline">{COMPANY.email}</a>
             </p>
           </div>
 
@@ -89,7 +95,11 @@ export function Footer() {
           size="large"
           className="flex flex-col gap-2 py-5 text-sm text-secondary-foreground/50 sm:flex-row sm:items-center sm:justify-between"
         >
-          <p>© {currentYear} Service SRL. Tutti i diritti riservati.</p>
+          <p>© {currentYear} {COMPANY.name}. Tutti i diritti riservati.</p>
+          <nav aria-label="Informative" className="flex flex-wrap gap-4">
+            <Link to="/privacy" className="hover:text-secondary-foreground">Privacy</Link>
+            <Link to="/cookie" className="hover:text-secondary-foreground">Cookie</Link>
+          </nav>
           <Link
             to="/contatti"
             className="transition-colors hover:text-secondary-foreground focus-visible:text-secondary-foreground"

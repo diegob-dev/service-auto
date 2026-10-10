@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { adminAuthEmail } from "../_shared/admin-identity.ts";
+import { recoveryEmail } from "../_shared/admin-identity.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,7 +63,7 @@ Deno.serve(async (request) => {
     if (action === "create") {
       if (!input.password) return json({ error: "Password obbligatoria" }, 400);
       const { data, error } = await admin.auth.admin.createUser({
-        email: adminAuthEmail(email),
+        email: recoveryEmail(email),
         password: input.password,
         email_confirm: true,
       });
@@ -88,6 +88,10 @@ Deno.serve(async (request) => {
         .eq("id", input.id)
         .maybeSingle();
       if (targetError || !target) return json({ error: targetError?.message ?? "Utente non trovato" }, 404);
+
+      if (input.password !== undefined) {
+        return json({ error: "La password può essere modificata soltanto dal proprietario dell'account" }, 403);
+      }
 
       if (
         input.id === authData.user.id
@@ -117,7 +121,6 @@ Deno.serve(async (request) => {
       if (error) return json({ error: error.message }, 400);
 
       const { error: authUpdateError } = await admin.auth.admin.updateUserById(input.id, {
-        ...(input.password !== undefined ? { password: input.password } : {}),
         ban_duration: input.active === false ? "876000h" : "none",
       });
       if (authUpdateError) {

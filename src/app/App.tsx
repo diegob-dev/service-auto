@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { setPageMetadata } from "@/lib/pageMetadata";
 
 const HomePage = lazy(() => import("../pages/HomePage").then((module) => ({ default: module.HomePage })));
 const WorkshopPage = lazy(() => import("../pages/WorkshopPage").then((module) => ({ default: module.WorkshopPage })));
@@ -8,37 +9,41 @@ const CarsPage = lazy(() => import("../pages/CarsPage").then((module) => ({ defa
 const CarDetailPage = lazy(() => import("../pages/CarDetailPage").then((module) => ({ default: module.CarDetailPage })));
 const AboutPage = lazy(() => import("../pages/AboutPage").then((module) => ({ default: module.AboutPage })));
 const ContactPage = lazy(() => import("../pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const PrivacyPage = lazy(() => import("../pages/PrivacyPage").then((module) => ({ default: module.PrivacyPage })));
+const CookiePage = lazy(() => import("../pages/CookiePage").then((module) => ({ default: module.CookiePage })));
 const AdminPage = lazy(() => import("../pages/AdminPage").then((module) => ({ default: module.AdminPage })));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 
 const pageMetadata: Record<string, { title: string; description: string }> = {
+  "/privacy": { title: "Informativa privacy | SERVICE SRL", description: "Informazioni sul trattamento dei dati personali sul sito SERVICE SRL." },
+  "/cookie": { title: "Informativa cookie | SERVICE SRL", description: "Cookie e archiviazione nel browser sul sito SERVICE SRL." },
   "/": {
-    title: "Service SRL | Officina Volvo e auto usate a Vigevano",
+    title: "SERVICE SRL | Officina Volvo e auto usate a Vigevano",
     description: "Officina specializzata Volvo e auto usate garantite a Vigevano: esperienza, trasparenza e assistenza professionale.",
   },
   "/officina": {
-    title: "Officina specializzata Volvo | Service SRL",
-    description: "Scopri l'officina Service SRL a Vigevano, specializzata nella manutenzione e riparazione di vetture Volvo.",
+    title: "Officina specializzata Volvo | SERVICE SRL",
+    description: "Scopri l'officina SERVICE SRL a Vigevano, specializzata nella manutenzione e riparazione di vetture Volvo.",
   },
   "/servizi": {
-    title: "Servizi di officina | Service SRL",
+    title: "Servizi di officina | SERVICE SRL",
     description: "Diagnosi, tagliandi, elettronica, pneumatici e assistenza auto professionale a Vigevano.",
   },
   "/auto-usate": {
-    title: "Auto usate garantite | Service SRL",
-    description: "Consulta le auto usate selezionate e garantite disponibili presso Service SRL a Vigevano.",
+    title: "Auto usate garantite | SERVICE SRL",
+    description: "Consulta le auto usate selezionate e garantite disponibili presso SERVICE SRL a Vigevano.",
   },
   "/chi-siamo": {
-    title: "Chi siamo | Service SRL",
-    description: "Conosci Service SRL, officina specializzata Volvo e punto di riferimento automotive a Vigevano.",
+    title: "Chi siamo | SERVICE SRL",
+    description: "Conosci SERVICE SRL, officina specializzata Volvo e punto di riferimento automotive a Vigevano.",
   },
   "/contatti": {
-    title: "Contatti e orari | Service SRL",
-    description: "Contatta Service SRL o raggiungi l'officina in Corso Giacomo Brodolini 32 a Vigevano.",
+    title: "Contatti e orari | SERVICE SRL",
+    description: "Contatta SERVICE SRL o raggiungi l'officina in Corso Giacomo Brodolini 32 a Vigevano.",
   },
   "/admin": {
-    title: "Area amministrativa | Service SRL",
-    description: "Area riservata Service SRL.",
+    title: "Area amministrativa | SERVICE SRL",
+    description: "Area riservata SERVICE SRL.",
   },
 };
 
@@ -46,18 +51,15 @@ function usePageMetadata() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const metadata = pathname.startsWith("/auto-usate/")
-      ? {
-          title: "Dettaglio auto usata | Service SRL",
-          description: "Dettagli, caratteristiche e fotografie dell'auto usata selezionata presso Service SRL.",
-        }
-      : pageMetadata[pathname] ?? {
-          title: "Pagina non trovata | Service SRL",
+    const metadata = pageMetadata[pathname] ?? {
+          title: "Pagina non trovata | SERVICE SRL",
           description: "La pagina richiesta non è disponibile.",
         };
 
-    document.title = metadata.title;
-    document.querySelector('meta[name="description"]')?.setAttribute("content", metadata.description);
+    // Le schede auto gestiscono i metadati dopo aver verificato la disponibilità.
+    if (!pathname.startsWith("/auto-usate/")) {
+      setPageMetadata(metadata.title, metadata.description, pathname !== "/admin" && pathname in pageMetadata, pathname);
+    }
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
 }
@@ -86,6 +88,8 @@ function App() {
         <Route path="/auto-usate/:carSlug" element={<CarDetailPage />} />
         <Route path="/chi-siamo" element={<AboutPage />} />
         <Route path="/contatti" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/cookie" element={<CookiePage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

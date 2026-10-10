@@ -17,9 +17,19 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const file = form.get("image");
     if (!(file instanceof File) || !file.size) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("La fotografia supera il limite di 10 MB.");
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
+      setError("Scegli una fotografia in formato JPG, PNG, WebP o AVIF.");
+      return;
+    }
 
     setBusy(true);
     setError("");
@@ -30,7 +40,7 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
         String(form.get("alt") ?? ""),
         form.get("cover") === "on",
       );
-      event.currentTarget.reset();
+      formElement.reset();
       await onChanged();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Caricamento non riuscito");

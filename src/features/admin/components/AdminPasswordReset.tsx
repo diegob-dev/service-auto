@@ -6,11 +6,12 @@ import { adminInputClass } from "../constants";
 
 type AdminPasswordResetProps = {
   onSubmit: (password: string) => Promise<void>;
+  onCancel?: () => void;
   busy: boolean;
   error: string;
 };
 
-export function AdminPasswordReset({ onSubmit, busy, error }: AdminPasswordResetProps) {
+export function AdminPasswordReset({ onSubmit, onCancel, busy, error }: AdminPasswordResetProps) {
   const [localError, setLocalError] = useState("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -63,9 +64,16 @@ export function AdminPasswordReset({ onSubmit, busy, error }: AdminPasswordReset
             {(localError || error) && (
               <p role="alert" className="text-sm text-red-600">{localError || error}</p>
             )}
-            <Button className="w-full" type="submit" disabled={busy}>
-              {busy ? "Aggiornamento…" : "Aggiorna password"}
-            </Button>
+            <div className="flex gap-2">
+              {onCancel && (
+                <Button className="flex-1" type="button" variant="outline" disabled={busy} onClick={onCancel}>
+                  Annulla
+                </Button>
+              )}
+              <Button className="flex-1" type="submit" disabled={busy}>
+                {busy ? "Aggiornamento…" : "Aggiorna password"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

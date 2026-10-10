@@ -2,11 +2,16 @@ import { Section } from "@/app/layouts/Section";
 import { ButtonAnchor } from "@/components/ui/button-link";
 import { PHONE_NUMBER } from "@/lib/constants";
 import { PageHero } from "@/components/PageHero";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { COMPANY } from "@/lib/company";
 import {
   Clock3,
   MapPin,
   Navigation,
   Phone,
+  Mail,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,6 +19,7 @@ const DIRECTIONS_URL =
   "https://www.google.com/maps/dir/?api=1&destination=Service+SRL+Corso+Giacomo+Brodolini+32+Vigevano";
 
 export function ContactPage() {
+  const [mapVisible, setMapVisible] = useState(false);
   const phoneHref = `tel:${PHONE_NUMBER.replace(/\s/g, "")}`;
 
   return (
@@ -49,6 +55,7 @@ export function ContactPage() {
           </div>
 
           <div className="grid gap-4">
+            <ContactDetail icon={Mail} title="Email" description="Scrivici per informazioni." value={COMPANY.email} href={`mailto:${COMPANY.email}`} />
             <ContactDetail
               icon={Phone}
               title="Telefono"
@@ -114,14 +121,23 @@ export function ContactPage() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
-            <iframe
-              title="Mappa di Service SRL — Corso Giacomo Brodolini 32, Vigevano"
+            {mapVisible ? <><iframe
+              title="Mappa di SERVICE SRL — Corso Giacomo Brodolini 32, Vigevano"
               src="https://www.google.com/maps?q=Service+SRL+Corso+Giacomo+Brodolini+32+Vigevano&output=embed"
               className="block h-80 w-full border-0 sm:h-120"
               loading="lazy"
               allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+              referrerPolicy="no-referrer"
+            /><div className="p-3 text-center"><Button type="button" variant="outline" onClick={() => setMapVisible(false)}>Nascondi la mappa</Button></div></> : (
+              <div className="flex min-h-80 flex-col items-center justify-center gap-5 p-8 text-center sm:min-h-120">
+                <MapPin className="size-10 text-primary-dark" aria-hidden="true" />
+                <p className="max-w-sm text-muted-foreground">
+                  Se mostri la mappa, Google riceve il tuo indirizzo IP e può utilizzare cookie propri.
+                  Puoi usare le indicazioni stradali senza attivarla qui. <Link to="/cookie" className="underline">Informativa cookie</Link>.
+                </p>
+                <Button type="button" onClick={() => setMapVisible(true)}>Mostra la mappa Google</Button>
+              </div>
+            )}
           </div>
         </div>
       </Section>

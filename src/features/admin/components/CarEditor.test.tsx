@@ -34,7 +34,6 @@ describe("CarEditor", () => {
       <CarEditor
         value={car}
         busy={false}
-        showLicensePlate
         onChange={vi.fn()}
         onClose={vi.fn()}
         onSubmit={onSubmit}
@@ -64,7 +63,6 @@ describe("CarEditor", () => {
       <CarEditor
         value={car}
         busy={false}
-        showLicensePlate
         onChange={vi.fn()}
         onClose={vi.fn()}
         onSubmit={onSubmit}
@@ -72,7 +70,7 @@ describe("CarEditor", () => {
       />,
     );
 
-    const form = screen.getByLabelText("Marca").closest("form");
+    const form = screen.getByRole("textbox", { name: /Marca/ }).closest("form");
     expect(form).not.toBeNull();
     fireEvent.submit(form!);
 
@@ -85,7 +83,6 @@ describe("CarEditor", () => {
       <CarEditor
         value={car}
         busy={false}
-        showLicensePlate
         onChange={vi.fn()}
         onClose={vi.fn()}
         onSubmit={vi.fn(async () => true)}
@@ -99,12 +96,11 @@ describe("CarEditor", () => {
     expect(screen.getByRole("button", { name: "Salva come bozza" })).toBeVisible();
   });
 
-  it("non mostra la targa al venditore", () => {
+  it("mostra chiaramente i campi obbligatori e rende disponibile la targa", () => {
     render(
       <CarEditor
         value={car}
         busy={false}
-        showLicensePlate={false}
         onChange={vi.fn()}
         onClose={vi.fn()}
         onSubmit={vi.fn(async () => true)}
@@ -112,6 +108,27 @@ describe("CarEditor", () => {
       />,
     );
 
-    expect(screen.queryByLabelText("Targa (solo admin)")).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /Marca/ })).toBeRequired();
+    expect(screen.getByRole("textbox", { name: /Modello/ })).toBeRequired();
+    expect(screen.getByText("I campi contrassegnati con", { exact: false })).toBeVisible();
+    expect(screen.getByLabelText("Targa")).toBeInTheDocument();
+  });
+
+  it("propone valori prestabiliti per alimentazione e cambio", () => {
+    render(
+      <CarEditor
+        value={car}
+        busy={false}
+        onChange={vi.fn()}
+        onClose={vi.fn()}
+        onSubmit={vi.fn(async () => true)}
+        onImagesChanged={vi.fn(async () => undefined)}
+      />,
+    );
+
+    expect(screen.getByRole("combobox", { name: "Alimentazione" })).toHaveValue("Benzina");
+    expect(screen.getByRole("option", { name: "Elettrica" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Cambio" })).toHaveValue("Automatico");
+    expect(screen.getByRole("option", { name: "Manuale" })).toBeInTheDocument();
   });
 });

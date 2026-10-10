@@ -28,7 +28,7 @@ const car: CarWithImages = {
 
 describe("CarsPanel", () => {
   it("mostra le auto in tabella con intestazioni e trattini per i valori mancanti", () => {
-    render(<CarsPanel cars={[car]} showLicensePlate onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
+    render(<CarsPanel cars={[car]} onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     expect(screen.getByRole("table")).toBeInTheDocument();
     expect(screen.getByRole("columnheader", { name: "Anno" })).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe("CarsPanel", () => {
   });
 
   it("filtra i risultati per singola colonna", () => {
-    render(<CarsPanel cars={[car]} showLicensePlate onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
+    render(<CarsPanel cars={[car]} onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     fireEvent.change(screen.getByRole("textbox", { name: "Filtra per targa" }), { target: { value: "ZZ" } });
     expect(screen.getByText("Nessuna auto corrisponde ai filtri selezionati.")).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe("CarsPanel", () => {
 
   it("filtra anno, chilometri e prezzo con intervalli da-a", () => {
     const completeCar = { ...car, year: 2024, kilometers: 42000, price: 28900 };
-    render(<CarsPanel cars={[completeCar]} showLicensePlate onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
+    render(<CarsPanel cars={[completeCar]} onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
 
     fireEvent.change(screen.getByRole("spinbutton", { name: "Anno da" }), { target: { value: "2025" } });
     expect(screen.getByText("Nessuna auto corrisponde ai filtri selezionati.")).toBeInTheDocument();
@@ -66,11 +66,4 @@ describe("CarsPanel", () => {
     expect(screen.getByText("AB123CD")).toBeInTheDocument();
   });
 
-  it("nasconde la targa nella vista venditore", () => {
-    render(<CarsPanel cars={[car]} showLicensePlate={false} onCreate={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />);
-
-    expect(screen.queryByRole("columnheader", { name: "Targa" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("textbox", { name: "Filtra per targa" })).not.toBeInTheDocument();
-    expect(screen.queryByText("AB123CD")).not.toBeInTheDocument();
-  });
 });

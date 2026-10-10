@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import type { CarWithImages } from "@/features/cars/types";
@@ -6,21 +6,43 @@ import { supabase } from "@/lib/supabase";
 import * as adminApi from "../api";
 import { emptyCar } from "../constants";
 import type { AdminUser, CarInput, StaffRole } from "../types";
+import { clearPasswordRecoveryError, passwordRecoveryRedirect } from "@/lib/passwordRecoveryRedirect";
 
 export type AdminTab = "cars" | "users";
+
+const RECOVERY_ACCOUNT_KEY = "service:password-recovery-user";
+function recoveryAccount(userId?: string | null) {
+  try {
+    if (userId === undefined) return sessionStorage.getItem(RECOVERY_ACCOUNT_KEY);
+    if (userId) sessionStorage.setItem(RECOVERY_ACCOUNT_KEY, userId);
+    else sessionStorage.removeItem(RECOVERY_ACCOUNT_KEY);
+  } catch {
+    // Il recupero resta utilizzabile anche se il browser blocca sessionStorage.
+  }
+  return null;
+}
 
 export function useAdminDashboard() {
   const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [loadingData, setLoadingData] = useState(false);
   const [recoveringPassword, setRecoveringPassword] = useState(false);
+  const recoveryInProgress = useRef(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const [cars, setCars] = useState<CarWithImages[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [currentUser, setCurrentUser] = useState<AdminUser | null>(null);
   const [tab, setTab] = useState<AdminTab>("cars");
   const [carForm, setCarForm] = useState<CarInput | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => {
+    const query = new URLSearchParams(window.location.search);
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    return passwordRecoveryRedirect.invalid || query.has("error") || fragment.has("error") || query.has("error_code") || fragment.has("error_code")
+      ? "Il link di recupero non è valido o è scaduto. Richiedi un nuovo link con Password dimenticata."
+      : "";
+  });
 
   const refresh = useCallback(async (role?: StaffRole) => {
     try {
@@ -37,45 +59,78 @@ export function useAdminDashboard() {
 
   const establishSession = useCallback(async (nextSession: Session) => {
     try {
+      if (recoveryInProgress.current) return;
       const profile = await adminApi.getCurrentAdmin();
+      if (recoveryInProgress.current) return;
       if (!profile) {
         await adminApi.logout();
         setSession(null);
         setError("Account non autorizzato ad accedere all'area amministrativa");
         return;
       }
+      setLoadingData(true);
       setSession(nextSession);
       setCurrentUser(profile);
       setTab("cars");
+      setCheckingAuth(false);
       await refresh(profile.role);
     } catch (caught) {
       setSession(null);
       setError(caught instanceof Error ? caught.message : "Verifica account non riuscita");
     } finally {
       setCheckingAuth(false);
+      setLoadingData(false);
     }
   }, [refresh]);
 
   useEffect(() => {
     let mounted = true;
-    void supabase.auth.getSession().then(({ data }) => {
+    // L'errore resta nel messaggio corrente, senza contaminare i tentativi successivi.
+    clearPasswordRecoveryError();
+    void supabase.auth.getSession().then(({ data, error: sessionError }) => {
       if (!mounted) return;
-      if (data.session) void establishSession(data.session);
+      if (sessionError) {
+        setError("Impossibile verificare l’accesso. Riprova tra qualche istante.");
+        setCheckingAuth(false);
+      } else if (data.session && (passwordRecoveryRedirect.active || recoveryInProgress.current || recoveryAccount() === data.session.user.id)) {
+        recoveryInProgress.current = true;
+        recoveryAccount(data.session.user.id);
+        setSession(data.session);
+        setRecoveringPassword(true);
+        setError("");
+        setCheckingAuth(false);
+      } else if (data.session) void establishSession(data.session);
       else setCheckingAuth(false);
+    }).catch(() => {
+      if (!mounted) return;
+      setError("Impossibile verificare l’accesso. Riprova tra qualche istante.");
+      setCheckingAuth(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!mounted) return;
       if (event === "SIGNED_OUT") {
+        passwordRecoveryRedirect.active = false;
+        recoveryInProgress.current = false;
+        recoveryAccount(null);
+        setRecoveringPassword(false);
         setSession(null);
         setCurrentUser(null);
         setTab("cars");
       }
       if (event === "PASSWORD_RECOVERY" && nextSession) {
+        clearPasswordRecoveryError();
+        recoveryInProgress.current = true;
+        recoveryAccount(nextSession.user.id);
         setSession(nextSession);
         setRecoveringPassword(true);
+        setError("");
         setCheckingAuth(false);
       }
-      if (event === "TOKEN_REFRESHED" && nextSession) void establishSession(nextSession);
+      if (event === "TOKEN_REFRESHED" && nextSession && !recoveryInProgress.current) {
+        // Esegue le chiamate Auth fuori dal callback, che mantiene un lock interno.
+        setTimeout(() => { if (mounted) void establishSession(nextSession); }, 0);
+      }
     });
     return () => {
       mounted = false;
@@ -139,7 +194,8 @@ export function useAdminDashboard() {
     event.preventDefault();
     setBusy(true);
     setError("");
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     try {
       await adminApi.saveUser({
         email: String(form.get("email")),
@@ -147,7 +203,7 @@ export function useAdminDashboard() {
         active: true,
         role: form.get("role") === "admin" ? "admin" : "seller",
       });
-      event.currentTarget.reset();
+      formElement.reset();
       await refresh(currentUser?.role);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Utente non salvato");
@@ -168,11 +224,17 @@ export function useAdminDashboard() {
     try {
       await adminApi.logout();
     } finally {
+      passwordRecoveryRedirect.active = false;
+      recoveryInProgress.current = false;
+      recoveryAccount(null);
+      setRecoveringPassword(false);
       setSession(null);
       setCurrentUser(null);
       setTab("cars");
       setCars([]);
       setUsers([]);
+      setLoadingData(false);
+      setChangingPassword(false);
     }
   }
 
@@ -182,8 +244,24 @@ export function useAdminDashboard() {
     try {
       await adminApi.updatePassword(password);
       await adminApi.logout();
+      passwordRecoveryRedirect.active = false;
+      recoveryInProgress.current = false;
+      recoveryAccount(null);
       setRecoveringPassword(false);
       setSession(null);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Password non aggiornata");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function changeOwnPassword(password: string) {
+    setBusy(true);
+    setError("");
+    try {
+      await adminApi.updatePassword(password);
+      setChangingPassword(false);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Password non aggiornata");
     } finally {
@@ -194,7 +272,9 @@ export function useAdminDashboard() {
   return {
     session,
     checkingAuth,
+    loadingData,
     recoveringPassword,
+    changingPassword,
     cars,
     users,
     currentUser,
@@ -205,6 +285,7 @@ export function useAdminDashboard() {
     setError,
     login,
     resetPassword,
+    changeOwnPassword,
     logout,
     saveCar,
     deleteCar,
@@ -213,6 +294,14 @@ export function useAdminDashboard() {
     refreshCurrent: async () => { await refresh(currentUser?.role); },
     showCars: () => setTab("cars"),
     showUsers: () => setTab("users"),
+    showPasswordChange: () => {
+      setError("");
+      setChangingPassword(true);
+    },
+    closePasswordChange: () => {
+      setError("");
+      setChangingPassword(false);
+    },
     createCar: () => setCarForm({ ...emptyCar }),
     editCar: (car: CarWithImages) => setCarForm({ ...car }),
     updateCarForm: setCarForm,

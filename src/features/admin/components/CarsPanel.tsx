@@ -6,7 +6,6 @@ import type { CarWithImages } from "@/features/cars/types";
 
 type CarsPanelProps = {
   cars: CarWithImages[];
-  showLicensePlate: boolean;
   onCreate: () => void;
   onEdit: (car: CarWithImages) => void;
   onDelete: (car: CarWithImages) => void | Promise<void>;
@@ -33,7 +32,6 @@ function isWithinRange(value: number | null, from: string, to: string) {
 
 export function CarsPanel({
   cars,
-  showLicensePlate,
   onCreate,
   onEdit,
   onDelete,
@@ -125,7 +123,7 @@ export function CarsPanel({
           </Button>
         </div>
 
-        <div className={`mt-5 grid gap-4 sm:grid-cols-2 ${showLicensePlate ? "xl:grid-cols-4" : "xl:grid-cols-3"}`}>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <label className="text-sm font-semibold">
             Auto
             <input
@@ -136,20 +134,18 @@ export function CarsPanel({
               onChange={(event) => setFilter("car", event.target.value)}
             />
           </label>
-          {showLicensePlate && (
-            <label className="text-sm font-semibold">
-              Targa
-              <input
-                className={filterInputClass}
-                aria-label="Filtra per targa"
-                placeholder="Es. AB123CD"
-                value={filters.licensePlate}
-                onChange={(event) =>
-                  setFilter("licensePlate", event.target.value)
-                }
-              />
-            </label>
-          )}
+          <label className="text-sm font-semibold">
+            Targa
+            <input
+              className={filterInputClass}
+              aria-label="Filtra per targa"
+              placeholder="Es. AB123CD"
+              value={filters.licensePlate}
+              onChange={(event) =>
+                setFilter("licensePlate", event.target.value)
+              }
+            />
+          </label>
           <label className="text-sm font-semibold">
             Stato
             <select
@@ -285,9 +281,7 @@ export function CarsPanel({
               <th scope="col" className="px-4 py-3 font-semibold">
                 Auto
               </th>
-              {showLicensePlate && (
-                <th scope="col" className="px-4 py-3 font-semibold">Targa</th>
-              )}
+              <th scope="col" className="px-4 py-3 font-semibold">Targa</th>
               <th scope="col" className="px-4 py-3 font-semibold">
                 Anno
               </th>
@@ -322,9 +316,7 @@ export function CarsPanel({
                     </span>
                   )}
                 </th>
-                {showLicensePlate && (
-                  <td className="px-4 py-4">{car.license_plate || missingValue}</td>
-                )}
+                <td className="px-4 py-4">{car.license_plate || missingValue}</td>
                 <td className="px-4 py-4">{car.year ?? missingValue}</td>
                 <td className="px-4 py-4">
                   {car.kilometers == null
@@ -378,7 +370,7 @@ export function CarsPanel({
             {filteredCars.length === 0 && (
               <tr>
                 <td
-                  colSpan={showLicensePlate ? 8 : 7}
+                  colSpan={8}
                   className="px-4 py-10 text-center text-muted-foreground"
                 >
                   {cars.length === 0

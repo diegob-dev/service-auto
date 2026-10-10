@@ -6,6 +6,7 @@ import { usePublishedCars } from "@/features/cars/hooks";
 import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { setPageMetadata } from "@/lib/pageMetadata";
 
 const missingValue = "-";
 
@@ -34,16 +35,17 @@ export function CarDetailPage() {
   const car = cars?.find(({ slug }) => slug === carSlug);
 
   useEffect(() => {
-    if (!car) return;
-    const carName = `${car.brand} ${car.model}`;
-    document.title = `${carName} usata | Service SRL`;
-    document
-      .querySelector('meta[name="description"]')
-      ?.setAttribute(
-        "content",
-        `Scopri fotografie, caratteristiche e disponibilità di ${carName} usata presso Service SRL a Vigevano.`,
+    if (!car) {
+      setPageMetadata(
+        isLoading ? "Dettaglio auto usata | SERVICE SRL" : "Auto non disponibile | SERVICE SRL",
+        isLoading ? "Caricamento della scheda auto." : "L'auto richiesta non è disponibile.",
+        false,
       );
-  }, [car]);
+      return;
+    }
+    const carName = `${car.brand} ${car.model}`;
+    setPageMetadata(`${carName} usata | SERVICE SRL`, `Scopri fotografie, caratteristiche e disponibilità di ${carName} usata presso SERVICE SRL a Vigevano.`, true, `/auto-usate/${car.slug}`);
+  }, [car, isLoading]);
 
   if (isLoading) return <CarDetailLoading />;
   if (isError) {

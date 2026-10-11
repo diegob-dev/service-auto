@@ -5,11 +5,15 @@
 Hosting previsto: Cloudflare Pages, build `npm run build`, cartella di pubblicazione `dist`.
 Dominio comunicato dal titolare: `https://servicevigevano.store`.
 Ramo collegato a Cloudflare indicato come frontend; nel repository è `front-end`.
-Le modifiche sono attualmente nel checkout `02-auto-usate`: prima della pubblicazione
-vanno portate nel ramo collegato a Cloudflare e va verificato il deploy effettivo.
+Il rilascio viene pubblicato dal checkout `02-auto-usate` al ramo remoto `front-end`.
+Verificare sempre il deploy effettivo sul dominio dopo il push.
 Usare Node compatibile con le dipendenze del progetto e installare con `npm ci` dal lockfile.
 
-Impostare le variabili descritte in `.env.example` nell'ambiente di build:
+Il progetto usa `wrangler.toml` come configurazione Cloudflare. Le due impostazioni
+pubbliche di Supabase sono definite nella sezione `[vars]` per essere disponibili
+durante la build; le sole impostazioni del pannello non erano sufficienti.
+Non inserire credenziali SMTP, chiavi Resend o chiavi Supabase private nel file.
+Le variabili di riferimento sono descritte in `.env.example`:
 
 - `VITE_SUPABASE_URL`: URL del progetto destinato al cliente.
 - `VITE_SUPABASE_PUBLISHABLE_KEY`: chiave pubblicabile; mai la service role.
@@ -95,6 +99,13 @@ esterni. Le foto caricate nel bucket sono pubbliche: coprire le targhe e non
 caricare documenti o altri contenuti riservati, comprese le foto delle bozze.
 
 ## Verifiche prima del lancio
+
+L'11 ottobre 2026 sono stati applicati gli aggiornamenti compatibili delle
+dipendenze. Restano sette segnalazioni high nella catena di strumenti CLI di
+shadcn (braces/fast-glob/ts-morph). Il sito importa da shadcn soltanto il CSS;
+questa catena non viene eseguita dal sito statico. Non è stato applicato il
+downgrade incompatibile suggerito da `npm audit fix --force`. Riesaminare la
+catena prima di usare il CLI su contenuti o percorsi non attendibili.
 
 1. Eseguire build, lint, test e controllo delle vulnerabilità delle dipendenze.
 2. Verificare HTTPS, dominio principale e variabili della build pubblicata.

@@ -40,10 +40,14 @@ di annunci occorre eseguire un nuovo deploy Cloudflare Pages. Senza questo
 passaggio i motori e i social possono leggere informazioni superate. Non è
 configurato un trigger automatico dall'area amministrativa.
 
-Cloudflare serve gli URL delle pagine senza estensione dai rispettivi `.html`.
-Il file `_redirects` generato mantiene le schede statiche prima del fallback
-del catalogo e permette l'accesso all'area amministrativa. `404.html` offre una
-pagina di errore esclusa dall'indicizzazione per gli URL sconosciuti.
+Cloudflare serve gli URL delle pagine senza estensione dai rispettivi `.html`,
+compresa l'area amministrativa (`admin.html`, esclusa dall'indicizzazione).
+Non si usa un file `_redirects`: Cloudflare trasformerebbe le riscritture verso
+file `.html` in redirect all'URL senza estensione, e l'app mostrerebbe 404.
+Gli URL senza pagina statica ricevono `404.html`, esclusa dall'indicizzazione:
+per un indirizzo inesistente l'app mostra "Pagina non trovata", mentre un'auto
+pubblicata dopo l'ultima build viene comunque caricata e mostrata dall'app
+(con stato HTTP 404 finché un nuovo deploy non genera la sua pagina).
 
 ## Attivazione e verifica SEO
 

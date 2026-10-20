@@ -46,10 +46,13 @@ for (const { route, metadata, car } of pages) {
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, document);
 }
-// Mantiene il fallback SPA per /admin, nuove auto e URL inesistenti.
-await writeFile(path.join(output, "200.html"), template);
-const carRewrites = cars.map((car) => `/auto-usate/${car.slug} /auto-usate/${car.slug}.html 200`);
-await writeFile(path.join(output, "_redirects"), `${carRewrites.join("\n")}\n/admin /200.html 200\n/auto-usate/* /200.html 200\n`);
+// Niente regole _redirects: su Cloudflare Pages una riscrittura verso un file .html
+// diventa un redirect all'URL senza estensione (/200.html -> /200) e l'app mostrerebbe 404.
+// /admin ha quindi una sua pagina statica; le auto pubblicate dopo l'ultima build e gli URL
+// inesistenti ricevono 404.html, da cui l'app carica comunque la pagina giusta.
+await writeFile(path.join(output, "admin.html"), template
+  .replace(/<title>[^<]*<\/title>/, `<title>${escape(pageMetadata["/admin"].title)}</title>`)
+  .replace('name="robots" content="index, follow"', 'name="robots" content="noindex, nofollow"'));
 const notFound = await renderPage("/404", []);
 await writeFile(path.join(output, "404.html"), template
   .replace(/<title>[^<]*<\/title>/, "<title>Pagina non trovata | SERVICE SRL</title>")

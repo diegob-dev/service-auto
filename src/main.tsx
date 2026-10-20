@@ -1,12 +1,12 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import "./global.css";
 import App from "./app/App";
 import { BrowserRouter } from "react-router-dom";
 import { QueryProvider } from "./app/providers/QueryProvider";
 import { AppLayout } from "./app/layouts/AppLayout";
 
-createRoot(document.getElementById("root")!).render(
+const app = (
   <StrictMode>
     <BrowserRouter>
       <QueryProvider>
@@ -15,5 +15,9 @@ createRoot(document.getElementById("root")!).render(
         </AppLayout>
       </QueryProvider>
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );
+
+const root = document.getElementById("root")!;
+if (root.dataset.prerendered === "true" && root.dataset.pathname === window.location.pathname) hydrateRoot(root, app);
+else createRoot(root).render(app);

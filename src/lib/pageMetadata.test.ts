@@ -42,4 +42,18 @@ describe("indicizzazione delle pagine", () => {
     expect(document.querySelector('meta[name="robots"]')).toHaveAttribute("content", "noindex, nofollow");
     expect(document.querySelector('link[rel="canonical"]')).toBeNull();
   });
+
+  it("elimina foto e dati dell'annuncio quando si passa a una pagina generale", () => {
+    vi.stubEnv("VITE_SITE_URL", "https://service.example");
+    setPageMetadata("Volvo usata", "Scheda auto", true, "/auto-usate/volvo", {
+      image: "https://images.example/volvo.jpg",
+      structuredData: { "@type": "Car", name: "Volvo </script>" },
+    });
+    expect(document.querySelector('meta[property="og:image"]')).toHaveAttribute("content", "https://images.example/volvo.jpg");
+    expect(document.getElementById("car-structured-data")?.textContent).not.toContain("</script>");
+    setPageMetadata("Officina", "Servizi", true, "/officina");
+    expect(document.getElementById("car-structured-data")).toBeNull();
+    expect(document.querySelector('meta[property="og:image"]')).toHaveAttribute("content", "https://service.example/og-image.jpg");
+    expect(document.querySelector('meta[name="twitter:title"]')).toHaveAttribute("content", "Officina");
+  });
 });

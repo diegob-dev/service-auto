@@ -78,14 +78,14 @@ const services: Feature[] = [
   {
     title: "Batterie",
     description:
-      "Test batterie e sostituzione con prodotti di alta qualità per partenza sempre affidabili.",
+      "Test batterie e sostituzione con prodotti di alta qualità per partenze sempre affidabili.",
     icon: CarBattery,
     image: BatterieImage,
   },
   {
     title: "Pre-revisione",
     description:
-      "Controllo completo del veicolo e verifica dei principali sistemi per affrontare la revisione senza pensieri",
+      "Controllo completo del veicolo e verifica dei principali sistemi per affrontare la revisione senza pensieri.",
     icon: CheckCircle2,
     image: PreRevisioneImage,
   },
@@ -146,10 +146,13 @@ export function ServicesPage() {
   return (
     <>
       <PageHero
+        image={{ src: DiagnosiImage, position: "center 55%" }}
+        eyebrow="Servizi di officina"
         title={<>Assistenza completa per ogni auto</>}
         description={
           <>
-            Esperienza multimarca, <br /> competenza specializzata Volvo.
+            Tagliandi, diagnosi, freni e pneumatici. <br />
+            Assistenza multimarca e competenza specializzata Volvo.
           </>
         }
       >

@@ -3,6 +3,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { CallToAction } from "@/components/CallToAction";
 import { FeatureGrid, type Feature } from "@/components/FeatureGrid";
 import { PageHero } from "@/components/PageHero";
+import WorkshopImage from "@/assets/workshop-specialists.webp";
 import { Gauge, MessageCircle, ShieldCheck } from "lucide-react";
 
 const workshopFeatures: Feature[] = [
@@ -30,13 +31,14 @@ export function WorkshopPage() {
   return (
     <>
       <PageHero
-        eyebrow="La nostra officina"
+        image={{ src: WorkshopImage, position: "65% center" }}
+        eyebrow="Officina specializzata Volvo"
         title={
           <>
             La tua Volvo in <span className="text-primary">buone mani</span>
           </>
         }
-        description="Esperienza, diagnosi accurata e un rapporto diretto: ci prendiamo cura della tua auto con la stessa attenzione che le dedicheresti tu."
+        description="Ci occupiamo della manutenzione e riparazione della tua Volvo: tagliandi, diagnosi elettronica e assistenza con un rapporto diretto."
       >
         <ButtonLink size="lg" to="/contatti">
           Prenota un appuntamento

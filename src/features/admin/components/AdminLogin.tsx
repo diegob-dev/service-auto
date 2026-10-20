@@ -54,11 +54,11 @@ export function AdminLogin({ onSubmit, onRequestPasswordReset, busy, error }: Ad
           </form> : <form className="space-y-4" onSubmit={onSubmit}>
             <label className="block text-sm font-semibold">
               Username o email
-              <input className={`${adminInputClass} mt-1`} name="email" type="text" autoComplete="username" required />
+              <input className={`${adminInputClass} mt-1`} name="email" type="text" autoComplete="username" required autoFocus />
             </label>
             <label className="block text-sm font-semibold">
               Password
-              <input className={`${adminInputClass} mt-1`} name="password" type="password" autoComplete="current-password" required autoFocus />
+              <input className={`${adminInputClass} mt-1`} name="password" type="password" autoComplete="current-password" required />
             </label>
             {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
             <Button className="w-full" type="submit" disabled={busy}>

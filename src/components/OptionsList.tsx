@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { IconsListCard } from "@/components/IconsListCard";
-import type { ReactNode } from "react";
 
 export interface OptionsListProps {
   icons: { title: string; description: string; icon: React.ReactNode }[];
-  title?: ReactNode;
   primaryButton?: string;
   secondaryButton?: string;
   primaryButtonClick?: () => void;

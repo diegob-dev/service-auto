@@ -1,4 +1,5 @@
-import WorkshopImage from "@/assets/workshop-specialists.jpg";
+import WorkshopImage from "@/assets/workshop-specialists.webp";
+import AboutHeroImage from "@/assets/chi-siamo.webp";
 import { Section } from "@/app/layouts/Section";
 import { ButtonLink } from "@/components/ui/button-link";
 import { CallToAction } from "@/components/CallToAction";
@@ -16,6 +17,7 @@ export function AboutPage() {
   return (
     <>
       <PageHero
+        image={{ src: AboutHeroImage, position: "70% center" }}
         eyebrow="SERVICE SRL"
         title={
           <>

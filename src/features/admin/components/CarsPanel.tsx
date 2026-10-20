@@ -230,7 +230,7 @@ export function CarsPanel({
                   aria-label="Chilometri a"
                   type="number"
                   min="0"
-                  placeholder="Es. 100.000"
+                  placeholder="Es. 100000"
                   value={filters.kilometersTo}
                   onChange={(event) =>
                     setFilter("kilometersTo", event.target.value)
@@ -250,7 +250,7 @@ export function CarsPanel({
                   aria-label="Prezzo da"
                   type="number"
                   min="0"
-                  placeholder="Es. 10.000"
+                  placeholder="Es. 10000"
                   value={filters.priceFrom}
                   onChange={(event) =>
                     setFilter("priceFrom", event.target.value)
@@ -264,7 +264,7 @@ export function CarsPanel({
                   aria-label="Prezzo a"
                   type="number"
                   min="0"
-                  placeholder="Es. 40.000"
+                  placeholder="Es. 40000"
                   value={filters.priceTo}
                   onChange={(event) => setFilter("priceTo", event.target.value)}
                 />

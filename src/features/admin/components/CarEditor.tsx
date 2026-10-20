@@ -6,6 +6,7 @@ import { adminInputClass } from "../constants";
 import type { CarInput } from "../types";
 import { ImagesEditor } from "./ImagesEditor";
 import { buildCarSlug } from "@/features/cars/slug";
+import { useDialog } from "@/lib/useDialog";
 
 type CarEditorProps = {
   value: CarInput;
@@ -42,6 +43,10 @@ const numberFields = [
 export function CarEditor(props: CarEditorProps) {
   const { value, busy, onChange, onClose, onSubmit, onImagesChanged } = props;
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // Esc chiede conferma: un tasto premuto per sbaglio non deve far perdere il lavoro.
+  const dialogRef = useDialog<HTMLDivElement>(() => {
+    if (window.confirm("Chiudere l’editor? Le modifiche non salvate andranno perse.")) onClose();
+  });
   const formRef = useRef<HTMLFormElement>(null);
   const set = (key: keyof CarInput, next: unknown) => onChange({ ...value, [key]: next });
   const slugPreview = value.id ? value.slug : buildCarSlug(value);
@@ -75,9 +80,16 @@ export function CarEditor(props: CarEditorProps) {
 
   return (
     <div className="fixed inset-0 z-60 overflow-y-auto bg-black/55 p-4">
-      <div className="mx-auto max-w-3xl rounded-xl bg-background p-6 shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="car-editor-title"
+        tabIndex={-1}
+        className="mx-auto max-w-3xl rounded-xl bg-background p-6 shadow-2xl outline-none"
+      >
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-display text-3xl uppercase">{value.id ? "Modifica auto" : "Nuova auto"}</h2>
+          <h2 id="car-editor-title" className="font-display text-3xl uppercase">{value.id ? "Modifica auto" : "Nuova auto"}</h2>
           <Button type="button" variant="ghost" size="icon" aria-label="Chiudi" onClick={onClose}><X /></Button>
         </div>
 

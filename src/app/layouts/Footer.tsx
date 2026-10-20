@@ -1,5 +1,5 @@
 import { NAV_LINKS, PHONE_NUMBER } from "@/lib/constants";
-import { Clock3, MapPin, Phone } from "lucide-react";
+import { Clock3, MapPin, Phone, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Container } from "./Container";
 import { COMPANY } from "@/lib/company";
@@ -27,6 +27,8 @@ export function Footer() {
             <p className="mt-4 text-sm leading-relaxed text-secondary-foreground/70">
               P. IVA {COMPANY.vatNumber}<br />
               Sede legale: {COMPANY.address}<br />
+              {COMPANY.rea && <>REA {COMPANY.rea}<br /></>}
+              {COMPANY.shareCapital && <>Capitale sociale {COMPANY.shareCapital}<br /></>}
               <a href={`mailto:${COMPANY.email}`} className="hover:underline">{COMPANY.email}</a>
             </p>
           </div>
@@ -71,19 +73,42 @@ export function Footer() {
                   className="mt-0.5 size-5 shrink-0 text-primary"
                   aria-hidden="true"
                 />
-                <Link
-                  to="/contatti"
-                  className="transition-colors hover:text-primary focus-visible:text-primary"
-                >
-                  Indicazioni e contatti
-                </Link>
+                <div>
+                  <p>{COMPANY.workshopAddress}</p>
+                  <a
+                    href={COMPANY.directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-block text-sm text-primary transition-colors hover:underline"
+                  >
+                    Indicazioni stradali
+                  </a>
+                </div>
               </li>
               <li className="flex items-start gap-3">
                 <Clock3
                   className="mt-0.5 size-5 shrink-0 text-primary"
                   aria-hidden="true"
                 />
-                <span>Lun–Ven: 08:00–12:00 · 14:00–19:00</span>
+                <p>
+                  Lun–Ven: 08:00–12:00 · 14:00–19:00
+                  <br />
+                  Sabato e domenica chiuso
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <Star
+                  className="mt-0.5 size-5 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+                <a
+                  href={COMPANY.reviewsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-primary focus-visible:text-primary"
+                >
+                  Leggi le recensioni su Google
+                </a>
               </li>
             </ul>
           </div>
@@ -100,12 +125,6 @@ export function Footer() {
             <Link to="/privacy" className="hover:text-secondary-foreground">Privacy</Link>
             <Link to="/cookie" className="hover:text-secondary-foreground">Cookie</Link>
           </nav>
-          <Link
-            to="/contatti"
-            className="transition-colors hover:text-secondary-foreground focus-visible:text-secondary-foreground"
-          >
-            Informazioni e assistenza
-          </Link>
         </Container>
       </div>
     </footer>

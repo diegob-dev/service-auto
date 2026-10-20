@@ -7,6 +7,8 @@ import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { setPageMetadata } from "@/lib/pageMetadata";
+import { getCarMetadata, getCarStructuredData } from "@/lib/seo";
+import { getCarImageUrl } from "@/features/cars/api";
 
 const missingValue = "-";
 
@@ -39,12 +41,18 @@ export function CarDetailPage() {
       setPageMetadata(
         isLoading ? "Dettaglio auto usata | SERVICE SRL" : "Auto non disponibile | SERVICE SRL",
         isLoading ? "Caricamento della scheda auto." : "L'auto richiesta non è disponibile.",
-        false,
+        isLoading,
       );
       return;
     }
-    const carName = `${car.brand} ${car.model}`;
-    setPageMetadata(`${carName} usata | SERVICE SRL`, `Scopri fotografie, caratteristiche e disponibilità di ${carName} usata presso SERVICE SRL a Vigevano.`, true, `/auto-usate/${car.slug}`);
+    const metadata = getCarMetadata(car);
+    const cover = car.car_images.find((image) => image.is_cover) ?? car.car_images[0];
+    const image = cover ? getCarImageUrl(cover.storage_path) : undefined;
+    const siteUrl = import.meta.env.VITE_SITE_URL?.trim();
+    setPageMetadata(metadata.title, metadata.description, true, `/auto-usate/${car.slug}`, {
+      image,
+      structuredData: siteUrl ? getCarStructuredData(car, siteUrl, image) : undefined,
+    });
   }, [car, isLoading]);
 
   if (isLoading) return <CarDetailLoading />;
@@ -124,7 +132,7 @@ export function CarDetailPage() {
           </div>
         </header>
 
-        <CarGallery images={car.car_images} carName={carName} />
+        <CarGallery key={car.id} images={car.car_images} carName={carName} />
 
         <div className="mt-8 flex flex-wrap gap-3">
           <span className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-semibold shadow-sm ring-1 ring-border">

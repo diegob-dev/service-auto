@@ -14,7 +14,7 @@ import uuid
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 BATCH = ROOT / "import-auto" / "2026-09-09"
 MANIFEST = BATCH / "auto-da-pubblicare.json"
 RECEIPT = BATCH / "import-result.json"

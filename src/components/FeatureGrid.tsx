@@ -56,9 +56,9 @@ export function FeatureGrid({ features, gap = "auto" }: FeatureGridProps) {
               <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary-dark">
                 <Icon className="size-6" aria-hidden="true" />
               </div>
-              <h2 className="font-display text-2xl tracking-wide uppercase">
+              <h3 className="font-display text-2xl tracking-wide uppercase">
                 {title}
-              </h2>
+              </h3>
             </div>
             <p className="mt-3 leading-relaxed text-muted-foreground">
               {description}

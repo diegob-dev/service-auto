@@ -31,10 +31,8 @@ data/*
 .venv
 *.exe
 *.bat
-*.json
 
-!src/assets/*.png
-!src/assets/workshop-specialists.jpg
-*.txt
+# Originali ad alta risoluzione delle immagini del sito (non pubblicati).
+/materiale-originale/
 *.log
 __pycache__

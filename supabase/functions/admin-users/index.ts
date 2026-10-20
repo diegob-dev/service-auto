@@ -57,8 +57,13 @@ Deno.serve(async (request) => {
       role?: "admin" | "seller";
     };
     const email = String(input?.email ?? "").trim().toLowerCase();
-    const role = input?.role === "admin" ? "admin" : "seller";
+    const role = input?.role;
     if (action !== "delete" && !email) return json({ error: "Username o email obbligatorio" }, 400);
+    // Nessun default: una richiesta incompleta non deve declassare o riattivare un account.
+    if (action === "create" || action === "update") {
+      if (role !== "admin" && role !== "seller") return json({ error: "Ruolo non valido" }, 400);
+      if (typeof input.active !== "boolean") return json({ error: "Stato dell'account mancante" }, 400);
+    }
 
     if (action === "create") {
       if (!input.password) return json({ error: "Password obbligatoria" }, 400);
@@ -71,7 +76,7 @@ Deno.serve(async (request) => {
 
       const { data: profile, error: profileError } = await admin
         .from("admin_profiles")
-        .upsert({ id: data.user.id, email, role, active: input.active !== false })
+        .upsert({ id: data.user.id, email, role, active: input.active })
         .select()
         .single();
       if (profileError) {
@@ -114,7 +119,7 @@ Deno.serve(async (request) => {
 
       const { data: profile, error } = await admin
         .from("admin_profiles")
-        .update({ role, active: input.active !== false, updated_at: new Date().toISOString() })
+        .update({ role, active: input.active, updated_at: new Date().toISOString() })
         .eq("id", input.id)
         .select()
         .single();

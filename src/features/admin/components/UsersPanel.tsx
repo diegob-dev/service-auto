@@ -72,7 +72,7 @@ export function UsersPanel(props: UsersPanelProps) {
           <form className="space-y-3" onSubmit={onCreate}>
             <input className={adminInputClass} name="email" type="email" aria-label="Email" placeholder="Email" autoComplete="email" required />
             <p className="text-xs text-muted-foreground">Usa un’email reale: servirà per recuperare la password.</p>
-            <input className={adminInputClass} name="password" type="password" aria-label="Password" placeholder="Password" autoComplete="new-password" required />
+            <input className={adminInputClass} name="password" type="password" aria-label="Password" placeholder="Password (minimo 10 caratteri)" autoComplete="new-password" minLength={10} required />
             <label className="block text-sm font-semibold">
               Ruolo
               <select className={`${adminInputClass} mt-1`} name="role" defaultValue="seller">
@@ -105,20 +105,26 @@ export function UsersPanel(props: UsersPanelProps) {
                   <span className="text-muted-foreground">{user.active ? "Attivo" : "Disattivato"}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <select
-                  className={`${adminInputClass} w-auto py-1.5 text-sm`}
-                  aria-label={`Ruolo di ${user.email}`}
-                  value={user.role}
-                  disabled={busy || pendingUser !== null}
-                  onChange={(event) => void changeRole(user, event.target.value as StaffRole)}
-                >
-                  <option value="seller">Venditore</option>
-                  <option value="admin">Admin</option>
-                </select>
-                <Button variant="outline" disabled={busy || pendingUser !== null} onClick={() => void toggle(user)}>{user.active ? "Disattiva" : "Riattiva"}</Button>
-                <Button variant="outline" disabled={busy || pendingUser !== null} className="text-red-600" onClick={() => void remove(user)}><Trash2 /> Elimina</Button>
-              </div>
+              {user.id === currentUserId ? (
+                <span className="text-sm font-semibold text-primary-dark">
+                  Il tuo account
+                </span>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    className={`${adminInputClass} w-auto py-1.5 text-sm`}
+                    aria-label={`Ruolo di ${user.email}`}
+                    value={user.role}
+                    disabled={busy || pendingUser !== null}
+                    onChange={(event) => void changeRole(user, event.target.value as StaffRole)}
+                  >
+                    <option value="seller">Venditore</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <Button variant="outline" disabled={busy || pendingUser !== null} onClick={() => void toggle(user)}>{user.active ? "Disattiva" : "Riattiva"}</Button>
+                  <Button variant="outline" disabled={busy || pendingUser !== null} className="text-red-600" onClick={() => void remove(user)}><Trash2 /> Elimina</Button>
+                </div>
+              )}
               {pendingUser?.id === user.id && (
                 <div
                   className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-card/80 backdrop-blur-[1px]"

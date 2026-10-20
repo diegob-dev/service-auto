@@ -5,6 +5,7 @@ import { PageHero } from "@/components/PageHero";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import ServiceImage from "@/assets/service-image.webp";
 import { COMPANY } from "@/lib/company";
 import {
   Clock3,
@@ -15,8 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-const DIRECTIONS_URL =
-  "https://www.google.com/maps/dir/?api=1&destination=Service+SRL+Corso+Giacomo+Brodolini+32+Vigevano";
+const DIRECTIONS_URL = COMPANY.directionsUrl;
 
 export function ContactPage() {
   const [mapVisible, setMapVisible] = useState(false);
@@ -25,6 +25,7 @@ export function ContactPage() {
   return (
     <>
       <PageHero
+        image={{ src: ServiceImage, position: "center 45%" }}
         eyebrow="Siamo qui per aiutarti"
         title={<span className="text-primary">Contatti</span>}
         description="Chiamaci per informazioni, per raccontarci il problema o per concordare un appuntamento in officina."
@@ -55,7 +56,13 @@ export function ContactPage() {
           </div>
 
           <div className="grid gap-4">
-            <ContactDetail icon={Mail} title="Email" description="Scrivici per informazioni." value={COMPANY.email} href={`mailto:${COMPANY.email}`} />
+            <ContactDetail
+              icon={Mail}
+              title="Email"
+              description="Scrivici per informazioni."
+              value={COMPANY.email}
+              href={`mailto:${COMPANY.email}`}
+            />
             <ContactDetail
               icon={Phone}
               title="Telefono"
@@ -66,7 +73,7 @@ export function ContactPage() {
             <ContactDetail
               icon={MapPin}
               title="Dove siamo"
-              description="Corso Giacomo Brodolini, 32 · 27029 Vigevano (PV)"
+              description={COMPANY.workshopAddress}
               value="Apri le indicazioni"
               href={DIRECTIONS_URL}
               external
@@ -103,9 +110,9 @@ export function ContactPage() {
                 aria-hidden="true"
               />
               <span>
-                Corso Giacomo Brodolini, 32
+                {COMPANY.street}
                 <br />
-                27029 Vigevano (PV)
+                {COMPANY.postalCode} {COMPANY.city} ({COMPANY.province})
               </span>
             </address>
             <ButtonAnchor
@@ -121,27 +128,87 @@ export function ContactPage() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
-            {mapVisible ? <><iframe
-              title="Mappa di SERVICE SRL — Corso Giacomo Brodolini 32, Vigevano"
-              src="https://www.google.com/maps?q=Service+SRL+Corso+Giacomo+Brodolini+32+Vigevano&output=embed"
-              className="block h-80 w-full border-0 sm:h-120"
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer"
-            /><div className="p-3 text-center"><Button type="button" variant="outline" onClick={() => setMapVisible(false)}>Nascondi la mappa</Button></div></> : (
-              <div className="flex min-h-80 flex-col items-center justify-center gap-5 p-8 text-center sm:min-h-120">
-                <MapPin className="size-10 text-primary-dark" aria-hidden="true" />
-                <p className="max-w-sm text-muted-foreground">
-                  Se mostri la mappa, Google riceve il tuo indirizzo IP e può utilizzare cookie propri.
-                  Puoi usare le indicazioni stradali senza attivarla qui. <Link to="/cookie" className="underline">Informativa cookie</Link>.
-                </p>
-                <Button type="button" onClick={() => setMapVisible(true)}>Mostra la mappa Google</Button>
+            {/* La mappa si carica solo su richiesta, come indicato nelle informative privacy e cookie. */}
+            {mapVisible ? (
+              <div className="relative">
+                <iframe
+                  title={`Mappa di ${COMPANY.name} — ${COMPANY.street}, ${COMPANY.city}`}
+                  src={COMPANY.mapEmbedUrl}
+                  className="block h-80 w-full border-0 sm:h-120"
+                  allowFullScreen
+                  referrerPolicy="no-referrer"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="absolute bottom-3 left-3 bg-background/95 shadow-md"
+                  onClick={() => setMapVisible(false)}
+                >
+                  Nascondi la mappa
+                </Button>
+              </div>
+            ) : (
+              <div className="relative h-80 overflow-hidden sm:h-120">
+                <MapPreviewArt />
+                <div className="absolute inset-0 flex items-center justify-center bg-linear-to-t from-foreground/35 via-foreground/10 to-transparent p-4">
+                  <div className="w-full max-w-sm rounded-2xl bg-background/90 p-6 text-center shadow-xl ring-1 ring-border backdrop-blur-sm">
+                    <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-primary/15 text-primary-dark">
+                      <MapPin className="size-6" aria-hidden="true" />
+                    </span>
+                    <p className="mt-3 font-display text-2xl tracking-wide uppercase">
+                      Mappa interattiva
+                    </p>
+                    <Button type="button" className="mt-4 w-full" onClick={() => setMapVisible(true)}>
+                      Mostra la mappa Google
+                    </Button>
+                    <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                      Caricando la mappa, Google riceve il tuo indirizzo IP e può usare cookie propri.{" "}
+                      <Link to="/cookie" className="underline hover:text-foreground">Informativa cookie</Link>
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
         </div>
       </Section>
     </>
+  );
+}
+
+/** Sfondo decorativo che richiama una mappa: non carica nulla da servizi esterni. */
+function MapPreviewArt() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="absolute inset-0 size-full scale-110 blur-[3px]"
+      viewBox="0 0 800 500"
+      preserveAspectRatio="xMidYMid slice"
+    >
+      <rect width="800" height="500" fill="#e9edf1" />
+      <g fill="#dde3ea">
+        <rect x="40" y="40" width="150" height="110" rx="8" />
+        <rect x="230" y="30" width="120" height="140" rx="8" />
+        <rect x="560" y="40" width="190" height="100" rx="8" />
+        <rect x="60" y="210" width="130" height="150" rx="8" />
+        <rect x="470" y="300" width="140" height="150" rx="8" />
+        <rect x="650" y="210" width="110" height="170" rx="8" />
+        <rect x="250" y="370" width="170" height="100" rx="8" />
+      </g>
+      <rect x="390" y="40" width="130" height="120" rx="12" fill="#d4e4d1" />
+      <rect x="250" y="220" width="160" height="110" rx="12" fill="#d4e4d1" />
+      <g fill="none" stroke="#ffffff" strokeLinecap="round">
+        <path d="M0 190 H800" strokeWidth="14" />
+        <path d="M210 0 V500" strokeWidth="12" />
+        <path d="M540 0 V500" strokeWidth="10" />
+        <path d="M0 400 C200 380 300 450 800 430" strokeWidth="8" />
+        <path d="M630 190 L760 500" strokeWidth="8" />
+        <path d="M0 80 H210" strokeWidth="6" />
+      </g>
+      <path d="M-20 520 L380 250 L820 -20" fill="none" stroke="#f1dfa8" strokeWidth="22" strokeLinecap="round" />
+      <circle cx="400" cy="244" r="30" fill="currentColor" className="text-primary/25" />
+    </svg>
   );
 }
 
@@ -168,9 +235,9 @@ function ContactDetail({
         <Icon className="size-5" aria-hidden="true" />
       </div>
       <div>
-        <h2 className="font-display text-xl tracking-wide uppercase">
+        <h3 className="font-display text-xl tracking-wide uppercase">
           {title}
-        </h2>
+        </h3>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
           {description}
         </p>

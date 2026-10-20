@@ -1,6 +1,6 @@
 // Cattura il tipo di link prima che Supabase consumi e rimuova i parametri Auth.
-const fragment = new URLSearchParams(window.location.hash.slice(1));
-const query = new URLSearchParams(window.location.search);
+const fragment = new URLSearchParams(typeof window === "undefined" ? "" : window.location.hash.slice(1));
+const query = new URLSearchParams(typeof window === "undefined" ? "" : window.location.search);
 export const passwordRecoveryRedirect = {
   active: fragment.get("type") === "recovery" && fragment.has("access_token") && fragment.has("refresh_token"),
   invalid: query.has("error") || fragment.has("error") || query.has("error_code") || fragment.has("error_code"),

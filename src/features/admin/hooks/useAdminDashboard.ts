@@ -128,8 +128,20 @@ export function useAdminDashboard() {
         setCheckingAuth(false);
       }
       if (event === "TOKEN_REFRESHED" && nextSession && !recoveryInProgress.current) {
+        // Il rinnovo del token aggiorna solo la sessione: niente schermata di caricamento
+        // né reset della scheda, così l'editor aperto non viene interrotto.
+        setSession(nextSession);
         // Esegue le chiamate Auth fuori dal callback, che mantiene un lock interno.
-        setTimeout(() => { if (mounted) void establishSession(nextSession); }, 0);
+        setTimeout(() => {
+          if (!mounted) return;
+          void adminApi.getCurrentAdmin().then((profile) => {
+            if (!mounted || profile) return;
+            setError("Account non più autorizzato ad accedere all'area amministrativa");
+            void adminApi.logout();
+          }).catch(() => {
+            // Un errore di rete temporaneo non chiude la sessione: le policy RLS restano valide.
+          });
+        }, 0);
       }
     });
     return () => {

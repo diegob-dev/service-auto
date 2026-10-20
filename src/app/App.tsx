@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { setPageMetadata } from "@/lib/pageMetadata";
+import { pageMetadata } from "@/lib/seo";
 
 const HomePage = lazy(() => import("../pages/HomePage").then((module) => ({ default: module.HomePage })));
 const WorkshopPage = lazy(() => import("../pages/WorkshopPage").then((module) => ({ default: module.WorkshopPage })));
@@ -14,41 +15,9 @@ const CookiePage = lazy(() => import("../pages/CookiePage").then((module) => ({ 
 const AdminPage = lazy(() => import("../pages/AdminPage").then((module) => ({ default: module.AdminPage })));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })));
 
-const pageMetadata: Record<string, { title: string; description: string }> = {
-  "/privacy": { title: "Informativa privacy | SERVICE SRL", description: "Informazioni sul trattamento dei dati personali sul sito SERVICE SRL." },
-  "/cookie": { title: "Informativa cookie | SERVICE SRL", description: "Cookie e archiviazione nel browser sul sito SERVICE SRL." },
-  "/": {
-    title: "SERVICE SRL | Officina Volvo e auto usate a Vigevano",
-    description: "Officina specializzata Volvo e auto usate garantite a Vigevano: esperienza, trasparenza e assistenza professionale.",
-  },
-  "/officina": {
-    title: "Officina specializzata Volvo | SERVICE SRL",
-    description: "Scopri l'officina SERVICE SRL a Vigevano, specializzata nella manutenzione e riparazione di vetture Volvo.",
-  },
-  "/servizi": {
-    title: "Servizi di officina | SERVICE SRL",
-    description: "Diagnosi, tagliandi, elettronica, pneumatici e assistenza auto professionale a Vigevano.",
-  },
-  "/auto-usate": {
-    title: "Auto usate garantite | SERVICE SRL",
-    description: "Consulta le auto usate selezionate e garantite disponibili presso SERVICE SRL a Vigevano.",
-  },
-  "/chi-siamo": {
-    title: "Chi siamo | SERVICE SRL",
-    description: "Conosci SERVICE SRL, officina specializzata Volvo e punto di riferimento automotive a Vigevano.",
-  },
-  "/contatti": {
-    title: "Contatti e orari | SERVICE SRL",
-    description: "Contatta SERVICE SRL o raggiungi l'officina in Corso Giacomo Brodolini 32 a Vigevano.",
-  },
-  "/admin": {
-    title: "Area amministrativa | SERVICE SRL",
-    description: "Area riservata SERVICE SRL.",
-  },
-};
-
 function usePageMetadata() {
-  const { pathname } = useLocation();
+  const { pathname: routePath } = useLocation();
+  const pathname = routePath.replace(/\/+$/, "") || "/";
 
   useEffect(() => {
     const metadata = pageMetadata[pathname] ?? {

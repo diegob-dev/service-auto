@@ -49,6 +49,10 @@ describe("UsersPanel", () => {
     expect(currentUserRow).toHaveClass("border-primary/40", "bg-primary/8", "shadow-sm");
     expect(container).not.toHaveTextContent("Tu");
     expect(container).not.toHaveTextContent("Cambia password");
+    // Sul proprio account non ci sono comandi che il server rifiuterebbe.
+    expect(screen.getByText("Il tuo account")).toBeInTheDocument();
+    expect(screen.queryByRole("combobox", { name: "Ruolo di zorro" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Elimina/ })).toHaveLength(1);
   });
 
   it("mostra un avanzamento mentre cambia il ruolo", async () => {

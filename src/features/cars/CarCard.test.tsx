@@ -5,6 +5,8 @@ import { CarCard } from "./CarCard";
 
 vi.mock("./api", () => ({
   getCarImageUrl: (storagePath: string) => `https://images.test/${storagePath}`,
+  getCarThumbnailUrl: (image: { storage_path: string; thumbnail_path?: string | null }) =>
+    `https://images.test/${image.thumbnail_path || image.storage_path}`,
 }));
 
 const car: CarWithImages = {

@@ -13,6 +13,7 @@ npm run dev
 npm run build
 npm run lint
 npm test
+npm run test:seo # dopo la build, verifica HTML e sitemap senza JavaScript
 ```
 
 
@@ -67,7 +68,7 @@ remota e non garantisce che Supabase accetti password di quattro caratteri.
 
 ## Importazione delle foto
 
-`scripts/import-photo-drafts.py` importa il lotto locale descritto da
+`scripts/archivio/import-photo-drafts.py` importa il lotto locale descritto da
 `import-auto/2026-09-06/auto-da-completare.json`. Verifica gli hash, usa identificativi
 stabili e crea soltanto bozze; interrompe l'importazione se trova un annuncio già
 pubblicato. Richiede la CLI Supabase autenticata e Python 3. L'archivio fotografico,
@@ -75,14 +76,14 @@ i manifest e i backup rimangono locali e sono esclusi da Git.
 
 ## Copertura delle targhe
 
-`scripts/cover-photo-plates.py` applica coperture blu con la scritta SERVICE VIGEVANO
+`scripts/archivio/cover-photo-plates.py` applica coperture blu con la scritta SERVICE VIGEVANO
 alle coordinate revisionate del lotto. Richiede Python 3, Pillow, NumPy e il font
 DejaVu Sans Bold. Legge gli originali senza modificarli e produce PNG senza perdita
 in `import-auto/2026-09-06/foto-targhe-python/`, verificando che ogni pixel esterno
 alle maschere rimanga identico. Le coordinate sono specifiche di queste foto:
 nuove immagini richiedono una nuova revisione, comprese le targhe sullo sfondo.
 
-Dopo il controllo visivo, `scripts/publish-covered-photos.py` carica i PNG,
+Dopo il controllo visivo, `scripts/archivio/publish-covered-photos.py` carica i PNG,
 verifica i file scaricati, aggiorna i riferimenti agli annunci e rimuove le vecchie
 copie dal bucket pubblico. Conserva backup e ricevute locali e controlla che
 numero delle immagini, ordine e copertine rimangano invariati. I nuovi URL evitano

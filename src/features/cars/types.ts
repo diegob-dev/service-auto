@@ -26,6 +26,8 @@ export type CarImageRecord = {
   id: string;
   car_id: string;
   storage_path: string;
+  /** Miniatura da 640 px; assente per le foto caricate prima della sua introduzione. */
+  thumbnail_path?: string | null;
   alt: string;
   position: number;
   is_cover: boolean;
@@ -34,17 +36,4 @@ export type CarImageRecord = {
 
 export type CarWithImages = CarRecord & {
   car_images: CarImageRecord[];
-};
-
-// Modello temporaneo usato dall'interfaccia collegata a db.json.
-// Verrà rimosso quando le card saranno alimentate da Supabase.
-export type LegacyCar = {
-  id: number;
-  model: string;
-  description: string;
-  year: number;
-  kilometers: number;
-  price: number;
-  fuel: string;
-  src: string;
 };

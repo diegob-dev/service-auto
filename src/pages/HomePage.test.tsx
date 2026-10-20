@@ -29,5 +29,7 @@ describe("HomePage", () => {
     expect(contactLink).toHaveAttribute("href", "/contatti");
     expect(contactLink.closest("button")).toBeNull();
     expect(servicesLink).toHaveAttribute("href", "/servizi");
+    // Senza auto in evidenza la sezione non viene mostrata.
+    expect(screen.queryByText(/in evidenza/i)).not.toBeInTheDocument();
   });
 });

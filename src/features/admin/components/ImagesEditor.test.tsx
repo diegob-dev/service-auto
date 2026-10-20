@@ -6,12 +6,15 @@ import { ImagesEditor } from "./ImagesEditor";
 
 vi.mock("@/features/cars/api", () => ({
   getCarImageUrl: (path: string) => `https://images.test/${path}`,
+  getCarThumbnailUrl: (image: { storage_path: string; thumbnail_path?: string | null }) =>
+    `https://images.test/${image.thumbnail_path || image.storage_path}`,
 }));
 
 vi.mock("../api", () => ({
   uploadCarImage: vi.fn(),
   setCoverImage: vi.fn(),
   deleteCarImage: vi.fn(),
+  reorderCarImages: vi.fn(),
 }));
 
 const car: CarInput & { id: string } = {
@@ -44,7 +47,7 @@ describe("ImagesEditor", () => {
     vi.mocked(adminApi.uploadCarImage).mockResolvedValue({} as never);
     const onChanged = vi.fn(async () => undefined);
     render(<ImagesEditor car={car} onChanged={onChanged} />);
-    const input = screen.getByLabelText(/Scegli immagine/) as HTMLInputElement;
+    const input = screen.getByLabelText(/Scegli immagini/) as HTMLInputElement;
     const file = new File(["photo"], "photo.jpg", { type: "image/jpeg" });
     fireEvent.change(input, { target: { files: [file] } });
     const form = input.form!;
@@ -71,7 +74,19 @@ describe("ImagesEditor", () => {
     expect(screen.getByText("Copertina attuale")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Usa come copertina: Vista frontale" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Usa come copertina: Vista posteriore" })).not.toBeChecked();
-    expect(screen.getByRole("checkbox", { name: "Usa come copertina" })).not.toBeChecked();
-    expect(screen.getByRole("button", { name: "Carica fotografia" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: /Usa come copertina/ })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Carica fotografie" })).toBeInTheDocument();
+  });
+
+  it("riordina le fotografie con le frecce", async () => {
+    vi.mocked(adminApi.reorderCarImages).mockResolvedValue(undefined);
+    const onChanged = vi.fn(async () => undefined);
+    render(<ImagesEditor car={car} onChanged={onChanged} />);
+
+    expect(screen.getByRole("button", { name: "Sposta prima la foto 1" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Sposta dopo la foto 1" }));
+
+    await waitFor(() => expect(onChanged).toHaveBeenCalledOnce());
+    expect(vi.mocked(adminApi.reorderCarImages).mock.calls[0][0].map(({ id }) => id)).toEqual(["rear", "cover"]);
   });
 });

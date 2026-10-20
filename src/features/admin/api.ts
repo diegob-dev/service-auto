@@ -3,11 +3,12 @@ import type { CarImageRecord, CarRecord, CarWithImages } from "@/features/cars/t
 import { buildCarSlug } from "@/features/cars/slug";
 import type { AdminUser, CarInput, StaffRole } from "./types";
 import { adminAuthEmail, recoveryEmail } from "../../../supabase/functions/_shared/admin-identity";
+import { adminError } from "./errors";
 
 const CAR_IMAGES_BUCKET = "car-image";
 
 function dataOrThrow<T>(data: T | null, error: { message: string } | null) {
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
   return data as T;
 }
 
@@ -21,7 +22,7 @@ async function throwFunctionError(error: { message: string; context?: unknown })
       // Mantiene il messaggio fornito dal client Supabase.
     }
   }
-  throw new Error(message);
+  throw adminError(message);
 }
 
 export async function login(identifier: string, password: string) {
@@ -32,12 +33,12 @@ export async function login(identifier: string, password: string) {
 
 export async function logout() {
   const { error } = await supabase.auth.signOut();
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
 }
 
 export async function updatePassword(password: string) {
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
 }
 
 export async function getCurrentAdmin() {
@@ -49,7 +50,7 @@ export async function getCurrentAdmin() {
     .select("id, email, role, active, created_at, updated_at")
     .eq("id", authData.user.id)
     .maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
   return data && (data.role === "admin" || data.role === "seller") && data.active
     ? data as AdminUser
     : null;
@@ -60,7 +61,7 @@ export async function listCars() {
     supabase.from("cars").select("*, car_images(*)").order("created_at", { ascending: false }),
     supabase.from("car_admin_details").select("car_id, license_plate"),
   ]);
-  if (privateDetailsError) throw new Error(privateDetailsError.message);
+  if (privateDetailsError) throw adminError(privateDetailsError.message);
   const cars = dataOrThrow(data, error) as CarWithImages[];
   const licensePlates = new Map(
     (privateDetails ?? []).map((detail) => [detail.car_id, detail.license_plate]),
@@ -78,7 +79,7 @@ export async function requestPasswordReset(identifier: string) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/admin`,
   });
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
 }
 
 export async function saveCar(car: CarInput) {
@@ -92,7 +93,7 @@ export async function saveCar(car: CarInput) {
       .from("cars")
       .select("slug")
       .like("slug", `${baseSlug}%`);
-    if (slugError) throw new Error(slugError.message);
+    if (slugError) throw adminError(slugError.message);
 
     const existingSlugs = new Set((existingCars ?? []).map(({ slug: existingSlug }) => existingSlug));
     slug = baseSlug;
@@ -131,12 +132,12 @@ export async function saveCar(car: CarInput) {
 }
 
 export async function deleteCar(car: CarWithImages) {
-  const paths = car.car_images.map((image) => image.storage_path);
+  const paths = car.car_images.flatMap((image) => imagePaths(image));
   const { error } = await supabase.from("cars").delete().eq("id", car.id);
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
   if (paths.length) {
     const { error: storageError } = await supabase.storage.from(CAR_IMAGES_BUCKET).remove(paths);
-    if (storageError) throw new Error(`Auto eliminata, ma alcune immagini non sono state ripulite: ${storageError.message}`);
+    if (storageError) throw adminError(`Auto eliminata, ma alcune immagini non sono state ripulite: ${storageError.message}`);
   }
 }
 
@@ -159,19 +160,36 @@ export function deleteUser(userId: string) {
   return invokeUsers<{ id: string }>({ action: "delete", user: { id: userId } });
 }
 
+function imagePaths(image: Pick<CarImageRecord, "storage_path" | "thumbnail_path">) {
+  return [image.storage_path, image.thumbnail_path].filter((path): path is string => Boolean(path));
+}
+
 export async function uploadCarImage(
   carId: string,
   file: File,
   alt: string,
   isCover: boolean,
+  thumbnail?: File | null,
 ) {
   const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
-  const storagePath = `${carId}/${crypto.randomUUID()}-${safeName}`;
+  const fileId = crypto.randomUUID();
+  const storagePath = `${carId}/${fileId}-${safeName}`;
+  let thumbnailPath: string | null = null;
   let imageInserted = false;
   const { error: uploadError } = await supabase.storage
     .from(CAR_IMAGES_BUCKET)
     .upload(storagePath, file, { contentType: file.type, upsert: false });
-  if (uploadError) throw new Error(uploadError.message);
+  if (uploadError) throw adminError(uploadError.message);
+
+  if (thumbnail) {
+    const safeThumbnailName = thumbnail.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
+    const path = `${carId}/thumbs/${fileId}-${safeThumbnailName}`;
+    const { error: thumbnailError } = await supabase.storage
+      .from(CAR_IMAGES_BUCKET)
+      .upload(path, thumbnail, { contentType: thumbnail.type, upsert: false });
+    // Senza miniatura il sito usa la foto completa: non serve bloccare il caricamento.
+    if (!thumbnailError) thumbnailPath = path;
+  }
 
   try {
     const { data: lastImage } = await supabase
@@ -186,6 +204,7 @@ export async function uploadCarImage(
       .insert({
         car_id: carId,
         storage_path: storagePath,
+        ...(thumbnailPath ? { thumbnail_path: thumbnailPath } : {}),
         alt,
         position: (lastImage?.position ?? -1) + 1,
         is_cover: false,
@@ -200,9 +219,23 @@ export async function uploadCarImage(
     // Se il record esiste, conserva anche il file: una selezione copertina
     // fallita non deve creare un riferimento rotto nel database.
     if (!imageInserted) {
-      await supabase.storage.from(CAR_IMAGES_BUCKET).remove([storagePath]);
+      await supabase.storage
+        .from(CAR_IMAGES_BUCKET)
+        .remove(imagePaths({ storage_path: storagePath, thumbnail_path: thumbnailPath }));
     }
     throw error instanceof Error ? error : new Error("Immagine non salvata");
+  }
+}
+
+/** Salva il nuovo ordine delle foto: la posizione diventa l'indice nell'elenco. */
+export async function reorderCarImages(images: CarImageRecord[]) {
+  for (const [position, image] of images.entries()) {
+    if (image.position === position) continue;
+    const { error } = await supabase
+      .from("car_images")
+      .update({ position })
+      .eq("id", image.id);
+    if (error) throw adminError(error.message);
   }
 }
 
@@ -216,9 +249,9 @@ export async function setCoverImage(image: CarImageRecord) {
 
 export async function deleteCarImage(image: CarImageRecord) {
   const { error } = await supabase.from("car_images").delete().eq("id", image.id);
-  if (error) throw new Error(error.message);
+  if (error) throw adminError(error.message);
   const { error: storageError } = await supabase.storage
     .from(CAR_IMAGES_BUCKET)
-    .remove([image.storage_path]);
-  if (storageError) throw new Error(`Immagine rimossa dall'auto, ma il file non è stato ripulito: ${storageError.message}`);
+    .remove(imagePaths(image));
+  if (storageError) throw adminError(`Immagine rimossa dall'auto, ma il file non è stato ripulito: ${storageError.message}`);
 }

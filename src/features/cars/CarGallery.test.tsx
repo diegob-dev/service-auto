@@ -5,6 +5,8 @@ import type { CarImageRecord } from "./types";
 
 vi.mock("./api", () => ({
   getCarImageUrl: (path: string) => `https://images.test/${path}`,
+  getCarThumbnailUrl: (image: { storage_path: string; thumbnail_path?: string | null }) =>
+    `https://images.test/${image.thumbnail_path || image.storage_path}`,
 }));
 
 const images: CarImageRecord[] = [

@@ -24,11 +24,44 @@ Senza `VITE_SITE_URL`, oppure con `VITE_SITE_INDEXABLE=false`, la build genera
 `noindex, nofollow` e un robots che blocca la scansione. Sulle build Cloudflare
 il controllo `CF_PAGES_BRANCH` abilita l'indicizzazione solo per `front-end` o
 `frontend`; gli altri rami restano esclusi anche nel codice eseguito dal browser.
-La build di sviluppo resta esclusa. La sitemap contiene otto pagine pubbliche;
-le singole auto sono raggiungibili dal catalogo e non sono incluse nella sitemap.
-Le anteprime dei link hanno un'immagine e metadati iniziali comuni; titolo e
-descrizione specifici vengono aggiornati dal browser. Anteprime specifiche per
-ogni annuncio richiedono HTML generato per ciascun URL.
+La build di sviluppo resta esclusa. `npm run build` genera HTML completo per
+le otto pagine pubbliche e per ogni auto pubblicata, con titoli, descrizioni,
+canonical e anteprime specifiche già nell'HTML. Le schede includono dati
+strutturati Car e, quando il prezzo è presente, Offer. La sitemap comprende
+anche le auto pubblicate e la loro data di aggiornamento. Bozze e auto vendute
+non vengono esportate. La generazione usa solo la chiave pubblicabile e le
+letture pubbliche esistenti; se il catalogo non è raggiungibile, la build fallisce
+per evitare di distribuire pagine o sitemap incomplete.
+
+Il browser verifica subito i dati correnti delle auto dopo aver caricato l'HTML.
+HTML iniziale, anteprime dei social e sitemap sono invece una fotografia del
+catalogo al momento della build: dopo creazioni, modifiche, vendite o rimozioni
+di annunci occorre eseguire un nuovo deploy Cloudflare Pages. Senza questo
+passaggio i motori e i social possono leggere informazioni superate. Non è
+configurato un trigger automatico dall'area amministrativa.
+
+Cloudflare serve gli URL delle pagine senza estensione dai rispettivi `.html`.
+Il file `_redirects` generato mantiene le schede statiche prima del fallback
+del catalogo e permette l'accesso all'area amministrativa. `404.html` offre una
+pagina di errore esclusa dall'indicizzazione per gli URL sconosciuti.
+
+## Attivazione e verifica SEO
+
+1. Pubblicare la build e verificare sul dominio `/robots.txt`, `/sitemap.xml`,
+   `/officina` e una scheda auto, controllando che l'HTML contenga testo e
+   metadati specifici senza eseguire JavaScript.
+2. In Google Search Console, verificare la proprietà del dominio con l'account
+   del titolare e inviare `https://servicevigevano.store/sitemap.xml`.
+3. Usare Controllo URL per home, officina, servizi, catalogo e una scheda auto;
+   verificare canonical, indicizzabilità e HTML della pagina scansionata.
+4. Nel Profilo dell'attività su Google, verificare con il titolare nome,
+   categoria, indirizzo, telefono, sito e orari; completare servizi e foto.
+   I dati devono corrispondere a quelli pubblicati sul sito.
+5. Dopo l'indicizzazione, monitorare ricerche, impressioni e clic in Search
+   Console. La presenza dei metadati non garantisce un posizionamento specifico.
+
+Search Console e il Profilo dell'attività richiedono l'accesso dell'account
+Google autorizzato; non vengono configurati dalla build del sito.
 
 Il file `public/_headers` configura gli header di base su Cloudflare Pages.
 L'area `/admin` riceve anche `X-Robots-Tag: noindex, nofollow`.
@@ -44,8 +77,16 @@ scarsa attività nell'arco di sette giorni. Riferimento:
 [Project Pausing](https://supabase.com/docs/guides/platform/free-project-pausing).
 
 Confrontare le migrazioni locali con quelle applicate al progetto remoto,
-in particolare le operazioni atomiche del 30 settembre e le policy targhe
-per venditori del 1 ottobre 2026. Distribuire la versione corrente di `admin-users`
+in particolare le operazioni atomiche del 30 settembre, le policy targhe
+per venditori del 1 ottobre 2026 e `20261015120000_preserve_license_plate`
+del 15 ottobre 2026, che modifica la targa solo quando la richiesta contiene
+il campo `license_plate`. La migrazione `20261020100000_car_image_thumbnails`
+aggiunge le miniature delle foto: va applicata **prima** di pubblicare il nuovo
+frontend, perché il catalogo pubblico legge la colonna `thumbnail_path`
+(altrimenti la build fallisce durante il prerender). Dopo la migrazione eseguire
+una volta `scripts/generate-thumbnails.py` per creare le miniature delle foto già
+caricate; le nuove foto caricate dall'area admin le ricevono automaticamente.
+Distribuire la versione corrente di `admin-users`
 seguendo il README. Non considerare una build del frontend come conferma
 dell'aggiornamento del database o della funzione.
 
@@ -56,7 +97,9 @@ Verificare con un account amministratore e uno venditore che:
 - un account disattivato non possa leggere dati riservati o modificare annunci,
   anche usando una sessione già aperta;
 - nessun utente possa rimuovere il proprio accesso amministratore;
-- creazione e disattivazione utenti funzionino sul backend remoto.
+- creazione e disattivazione utenti funzionino sul backend remoto;
+- salvare un'auto senza modificare la targa non la cancelli;
+- un tentativo di registrazione pubblica venga rifiutato.
 
 Ogni utente può cambiare la propria password e richiedere un link di recupero
 dal login. Il frontend e la funzione server richiedono email reali per i nuovi
@@ -67,6 +110,8 @@ Non convertire account senza avere verificato il titolare della nuova email.
 Sul progetto remoto, verificare:
 
 - Site URL `https://servicevigevano.store`;
+- registrazioni pubbliche disattivate: gli account si creano solo dall'area admin;
+- lunghezza minima della password di 10 caratteri;
 - redirect consentito `https://servicevigevano.store/admin`;
 - servizio di invio SMTP e template contenente il link di conferma;
 - recapito a una casella reale, apertura del link, aggiornamento password,
@@ -103,7 +148,8 @@ caricare documenti o altri contenuti riservati, comprese le foto delle bozze.
 L'11 ottobre 2026 sono stati applicati gli aggiornamenti compatibili delle
 dipendenze. Restano sette segnalazioni high nella catena di strumenti CLI di
 shadcn (braces/fast-glob/ts-morph). Il sito importa da shadcn soltanto il CSS;
-questa catena non viene eseguita dal sito statico. Non è stato applicato il
+questa catena non viene eseguita dal sito statico e dal 15 ottobre 2026
+`shadcn` è tra le `devDependencies`, non tra le dipendenze di produzione. Non è stato applicato il
 downgrade incompatibile suggerito da `npm audit fix --force`. Riesaminare la
 catena prima di usare il CLI su contenuti o percorsi non attendibili.
 

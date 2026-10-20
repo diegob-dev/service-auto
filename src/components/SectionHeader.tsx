@@ -27,7 +27,7 @@ export const SectionHeader = ({
   };
 
   const marginStyle = {
-    none: "none",
+    none: "",
     xs: "mb-4",
     sm: "mb-8",
     md: "mb-10",

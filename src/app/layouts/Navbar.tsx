@@ -11,12 +11,28 @@ import { ButtonAnchor } from "@/components/ui/button-link";
 import { Logo } from "./Logo";
 import { Menu, Phone, X } from "lucide-react";
 import { Container } from "./Container";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NAV_LINKS, PHONE_NUMBER } from "@/lib/constants";
 
 export const Navbar = () => {
   const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Il menu è legato alla pagina in cui è stato aperto: cambiando pagina
+  // (anche dal logo o con il tasto Indietro) si chiude da solo.
+  const [menuOpenOn, setMenuOpenOn] = useState<string | null>(null);
+  const isMenuOpen = menuOpenOn === location.pathname;
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeMenu = () => setMenuOpenOn(null);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setMenuOpenOn(null);
+      menuButtonRef.current?.focus();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
   const phoneHref = `tel:${PHONE_NUMBER.replace(/\s/g, "")}`;
 
   const isActive = (href: string) =>
@@ -45,7 +61,7 @@ export const Navbar = () => {
         </NavigationMenuList>
         <div className="hidden items-center justify-end gap-2 text-background uppercase font-bold min-[1180px]:flex">
           <ButtonAnchor variant="default" size="lg" href={phoneHref}>
-            <Phone className="mr-1" />
+            <Phone className="mr-1" aria-hidden="true" />
             Contattaci
           </ButtonAnchor>
         </div>
@@ -68,9 +84,10 @@ export const Navbar = () => {
             aria-label={isMenuOpen ? "Chiudi menu" : "Apri menu"}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-navigation"
-            onClick={() => setIsMenuOpen((open) => !open)}
+            ref={menuButtonRef}
+            onClick={() => setMenuOpenOn(isMenuOpen ? null : location.pathname)}
           >
-            {isMenuOpen ? <X /> : <Menu />}
+            {isMenuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
           </Button>
         </div>
       </Container>
@@ -84,7 +101,7 @@ export const Navbar = () => {
               <Link
                 key={link.href}
                 to={link.href}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={closeMenu}
                 className={`px-4 py-3 uppercase transition-colors hover:text-primary ${
                   isActive(link.href) ? "text-primary" : "text-background"
                 }`}
@@ -96,7 +113,7 @@ export const Navbar = () => {
               href={phoneHref}
               className="mt-2 flex items-center gap-2 px-4 py-3 text-primary uppercase"
             >
-              <Phone className="size-4" /> Chiama {PHONE_NUMBER}
+              <Phone className="size-4" aria-hidden="true" /> Chiama {PHONE_NUMBER}
             </a>
           </nav>
         </div>

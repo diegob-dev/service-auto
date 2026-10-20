@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCarImageUrl } from "./api";
+import { getCarImageUrl, getCarThumbnailUrl } from "./api";
+import { useDialog } from "@/lib/useDialog";
 import type { CarImageRecord } from "./types";
 
 type CarGalleryProps = {
@@ -21,6 +22,10 @@ export function CarGallery({ images, carName }: CarGalleryProps) {
   const activeImage = orderedImages[activeIndex];
   const fullscreenImage =
     fullscreenIndex == null ? null : orderedImages[fullscreenIndex];
+  const dialogRef = useDialog<HTMLDivElement>(
+    () => setFullscreenIndex(null),
+    fullscreenIndex != null,
+  );
 
   useEffect(() => {
     if (fullscreenIndex == null) return;
@@ -28,7 +33,6 @@ export function CarGallery({ images, carName }: CarGalleryProps) {
     document.body.style.overflow = "hidden";
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setFullscreenIndex(null);
       if (event.key === "ArrowLeft") {
         setFullscreenIndex((current) =>
           current == null
@@ -107,7 +111,7 @@ export function CarGallery({ images, carName }: CarGalleryProps) {
               onClick={() => setActiveIndex(index)}
             >
               <img
-                src={getCarImageUrl(image.storage_path)}
+                src={getCarThumbnailUrl(image)}
                 alt=""
                 className="aspect-video w-32 object-cover sm:w-40"
               />
@@ -118,7 +122,9 @@ export function CarGallery({ images, carName }: CarGalleryProps) {
 
       {fullscreenImage && fullscreenIndex != null && (
         <div
-          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 sm:p-8"
+          ref={dialogRef}
+          tabIndex={-1}
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-4 outline-none sm:p-8"
           role="dialog"
           aria-modal="true"
           aria-label={`Fotografia a tutto schermo di ${carName}`}

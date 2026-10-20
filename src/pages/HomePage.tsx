@@ -1,6 +1,6 @@
 import { ImageMaxWidth } from "@/components/ImageMaxWidth";
-import ServiceImage from "@/assets/service-image.jpg";
-import WorkshopSpecialistsImage from "@/assets/workshop-specialists.jpg";
+import ServiceImage from "@/assets/service-image.webp";
+import WorkshopSpecialistsImage from "@/assets/workshop-specialists.webp";
 import { Container } from "@/app/layouts/Container";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
@@ -25,16 +25,16 @@ export const HomePage = () => {
 
   return (
     <>
-      <ImageMaxWidth src={ServiceImage} alt="Service Image">
+      <ImageMaxWidth src={ServiceImage} alt="Officina SERVICE SRL a Vigevano">
         <Container className="flex h-full items-center justify-start">
           <div>
-            <h1 className="font-display text-4xl uppercase leading-tight tracking-medium text-background sm:text-5xl md:text-6xl">
+            <h1 className="font-display text-4xl uppercase leading-tight text-background sm:text-5xl md:text-6xl">
               Officina specializzata <br />
               <span className="text-primary-dark">Volvo</span>
               <br />e auto usate garantite
             </h1>
             <p className="mt-4 text-lg text-background/80">
-              Passione. Competenza. Affidabilità.
+              Passione, competenza e affidabilità.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <ButtonLink variant="default" size="lg" to="/contatti">
@@ -49,17 +49,20 @@ export const HomePage = () => {
           </div>
         </Container>
       </ImageMaxWidth>
-      <Section tone="light" height="md">
-        <SectionHeader
-          margin="sm"
-          title={
-            <>
-              Auto usate <span className="text-primary-dark">in evidenza</span>
-            </>
-          }
-        />
-        <CarsList cars={cars} isLoading={isLoading} isError={isError} />
-      </Section>
+      {/* Senza auto in evidenza (o se il catalogo non risponde) la sezione non compare. */}
+      {(isLoading || (!isError && Boolean(cars?.length))) && (
+        <Section tone="light" height="md">
+          <SectionHeader
+            margin="sm"
+            title={
+              <>
+                Auto usate <span className="text-primary-dark">in evidenza</span>
+              </>
+            }
+          />
+          <CarsList cars={cars} isLoading={isLoading} isError={isError} />
+        </Section>
+      )}
       <Section tone="dark" height="md">
         <SectionHeader
           align="center"

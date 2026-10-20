@@ -156,8 +156,8 @@ export const CarsList = ({ cars, isLoading, isError, showFilters = false }: Cars
                 <div className="mt-5 grid gap-4 lg:grid-cols-3">
                   {[
                     { label: "Anno", fromKey: "yearFrom", toKey: "yearTo", fromPlaceholder: "Es. 2018", toPlaceholder: "Es. 2026" },
-                    { label: "Chilometri", fromKey: "kilometersFrom", toKey: "kilometersTo", fromPlaceholder: "Es. 0", toPlaceholder: "Es. 100.000" },
-                    { label: "Prezzo", fromKey: "priceFrom", toKey: "priceTo", fromPlaceholder: "Es. 10.000", toPlaceholder: "Es. 40.000" },
+                    { label: "Chilometri", fromKey: "kilometersFrom", toKey: "kilometersTo", fromPlaceholder: "Es. 0", toPlaceholder: "Es. 100000" },
+                    { label: "Prezzo", fromKey: "priceFrom", toKey: "priceTo", fromPlaceholder: "Es. 10000", toPlaceholder: "Es. 40000" },
                   ].map(({ label, fromKey, toKey, fromPlaceholder, toPlaceholder }) => (
                     <fieldset key={label} className="rounded-xl border bg-muted/35 p-4">
                       <legend className="px-1 text-sm font-bold">{label}</legend>

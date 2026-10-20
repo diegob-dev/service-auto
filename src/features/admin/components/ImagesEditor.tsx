@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { ImagePlus, Star, Trash2, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImagePlus, Star, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCarImageUrl } from "@/features/cars/api";
+import { getCarThumbnailUrl } from "@/features/cars/api";
 import * as adminApi from "../api";
+import { createThumbnail, prepareImageForUpload } from "../prepareImage";
 import { adminInputClass } from "../constants";
 import type { CarInput } from "../types";
 
@@ -11,45 +12,89 @@ type ImagesEditorProps = {
   onChanged: () => Promise<void>;
 };
 
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
 export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState("");
+  const imageCount = car.car_images?.length ?? 0;
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    const file = form.get("image");
-    if (!(file instanceof File) || !file.size) return;
+    const files = form
+      .getAll("image")
+      .filter((value): value is File => value instanceof File && value.size > 0);
+    if (!files.length) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      setError("La fotografia supera il limite di 10 MB.");
+    const invalid = files.find((file) => !ALLOWED_TYPES.includes(file.type));
+    if (invalid) {
+      setError(`“${invalid.name}” non è in formato JPG, PNG, WebP o AVIF.`);
       return;
     }
-    if (!["image/jpeg", "image/png", "image/webp", "image/avif"].includes(file.type)) {
-      setError("Scegli una fotografia in formato JPG, PNG, WebP o AVIF.");
-      return;
+
+    const alt = String(form.get("alt") ?? "").trim();
+    const coverRequested = form.get("cover") === "on";
+    const failures: string[] = [];
+    setBusy(true);
+    setError("");
+    try {
+      for (const [index, file] of files.entries()) {
+        setProgress(files.length > 1 ? `Caricamento ${index + 1} di ${files.length}…` : "Caricamento…");
+        try {
+          // Le foto vengono ridotte nel browser: il catalogo pubblico non scarica file da diversi MB.
+          const preparedFile = await prepareImageForUpload(file);
+          if (preparedFile.size > MAX_UPLOAD_BYTES) {
+            failures.push(`${file.name}: supera il limite di 10 MB`);
+            continue;
+          }
+          const thumbnail = await createThumbnail(preparedFile);
+          await adminApi.uploadCarImage(car.id, preparedFile, alt, coverRequested && index === 0, thumbnail);
+        } catch (caught) {
+          failures.push(`${file.name}: ${caught instanceof Error ? caught.message : "caricamento non riuscito"}`);
+        }
+      }
+      if (failures.length) {
+        setError(
+          files.length === 1
+            ? `Caricamento non riuscito. ${failures[0]}`
+            : `${failures.length} foto su ${files.length} non sono state caricate. ${failures.join(" · ")}`,
+        );
+      } else {
+        formElement.reset();
+      }
+    } finally {
+      try {
+        await onChanged();
+      } catch {
+        // Conserva l'errore originale, ma mostra le immagini già salvate quando possibile.
+      }
+      setProgress("");
+      setBusy(false);
     }
+  }
+
+  async function move(index: number, direction: -1 | 1) {
+    const images = [...(car.car_images ?? [])];
+    const target = index + direction;
+    if (target < 0 || target >= images.length) return;
+    [images[index], images[target]] = [images[target], images[index]];
 
     setBusy(true);
     setError("");
     try {
-      await adminApi.uploadCarImage(
-        car.id,
-        file,
-        String(form.get("alt") ?? ""),
-        form.get("cover") === "on",
-      );
-      formElement.reset();
-      await onChanged();
+      await adminApi.reorderCarImages(images);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Caricamento non riuscito");
+      setError(caught instanceof Error ? caught.message : "Ordine non salvato");
+    } finally {
       try {
         await onChanged();
       } catch {
-        // Conserva l'errore originale, ma mostra l'immagine se era già salvata.
+        // Riallinea la UI quando possibile.
       }
-    } finally {
       setBusy(false);
     }
   }
@@ -82,7 +127,7 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
       <div className="mb-5">
         <h3 className="flex items-center gap-2 text-xl font-bold"><ImagePlus /> Fotografie dell’auto</h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          La copertina è la fotografia mostrata nell’elenco delle auto usate.
+          La copertina è la fotografia mostrata nell’elenco delle auto usate. Con le frecce scegli l’ordine delle altre foto nella scheda.
         </p>
       </div>
 
@@ -90,10 +135,10 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
 
       {car.car_images?.length ? (
         <div className="grid gap-4 sm:grid-cols-2">
-          {car.car_images.map((image) => (
+          {car.car_images.map((image, index) => (
             <article key={image.id} className={`overflow-hidden rounded-xl border bg-card ${image.is_cover ? "ring-2 ring-primary" : ""}`}>
               <div className="relative">
-                <img src={getCarImageUrl(image.storage_path)} alt={image.alt} className="aspect-video w-full object-cover" />
+                <img src={getCarThumbnailUrl(image)} alt={image.alt} className="aspect-video w-full object-cover" />
                 {image.is_cover && (
                   <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow">
                     <Star size={14} className="fill-current" aria-hidden="true" /> Copertina attuale
@@ -113,9 +158,35 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
                 </Button>
               </div>
               <div className="p-3">
-                <p className="truncate text-sm text-muted-foreground">
-                  {image.alt || `${car.brand} ${car.model}`}
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="min-w-0 truncate text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">Foto {index + 1}</span> · {image.alt || `${car.brand} ${car.model}`}
+                  </p>
+                  <div className="flex shrink-0 gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      disabled={busy || index === 0}
+                      aria-label={`Sposta prima la foto ${index + 1}`}
+                      title="Sposta prima"
+                      onClick={() => void move(index, -1)}
+                    >
+                      <ChevronLeft aria-hidden="true" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      disabled={busy || index === imageCount - 1}
+                      aria-label={`Sposta dopo la foto ${index + 1}`}
+                      title="Sposta dopo"
+                      onClick={() => void move(index, 1)}
+                    >
+                      <ChevronRight aria-hidden="true" />
+                    </Button>
+                  </div>
+                </div>
                 <label className={`mt-3 flex cursor-pointer items-center gap-2 rounded-lg border p-2.5 text-sm font-semibold transition-colors ${image.is_cover ? "border-primary bg-primary/10 text-primary-dark" : "hover:bg-muted"}`}>
                   <input
                     type="radio"
@@ -142,25 +213,25 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
       )}
 
       <form className="mt-6 rounded-xl bg-muted p-5" onSubmit={upload}>
-        <h4 className="flex items-center gap-2 font-bold"><Upload size={18} /> Aggiungi una fotografia</h4>
+        <h4 className="flex items-center gap-2 font-bold"><Upload size={18} aria-hidden="true" /> Aggiungi fotografie</h4>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <label className="text-sm font-semibold">
-            Scegli immagine
-            <input className={`${adminInputClass} mt-1 cursor-pointer`} name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required />
-            <span className="mt-1 block text-xs font-normal text-muted-foreground">JPG, PNG, WebP o AVIF, massimo 10 MB.</span>
+            Scegli immagini
+            <input className={`${adminInputClass} mt-1 cursor-pointer`} name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple required />
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">Puoi selezionarne più di una. JPG, PNG, WebP o AVIF; le foto grandi vengono ridotte automaticamente.</span>
           </label>
           <label className="text-sm font-semibold">
             Descrizione dell’immagine
             <input className={`${adminInputClass} mt-1`} name="alt" placeholder={`${car.brand} ${car.model}`} />
-            <span className="mt-1 block text-xs font-normal text-muted-foreground">Aiuta a descrivere la fotografia anche a chi non può vederla.</span>
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">Aiuta a descrivere la fotografia anche a chi non può vederla. Con più foto vale per tutte.</span>
           </label>
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <label className="flex items-center gap-2 text-sm font-semibold">
-            <input type="checkbox" name="cover" defaultChecked={!car.car_images?.length} /> Usa come copertina
+            <input type="checkbox" name="cover" defaultChecked={!car.car_images?.length} /> Usa come copertina (la prima selezionata)
           </label>
           <Button type="submit" disabled={busy}>
-            <Upload aria-hidden="true" /> {busy ? "Caricamento…" : "Carica fotografia"}
+            <Upload aria-hidden="true" /> {busy ? progress || "Attendere…" : "Carica fotografie"}
           </Button>
         </div>
       </form>

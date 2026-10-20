@@ -5,6 +5,7 @@ import { CarEditor } from "./CarEditor";
 
 vi.mock("@/features/cars/api", () => ({
   getCarImageUrl: vi.fn(),
+  getCarThumbnailUrl: vi.fn(),
 }));
 
 const car: CarInput = {
@@ -49,7 +50,7 @@ describe("CarEditor", () => {
     const form = screen.getByLabelText("Descrizione").closest("form");
     expect(form).not.toBeNull();
     fireEvent.submit(form!);
-    expect(await screen.findByLabelText(/Scegli immagine/)).toBeVisible();
+    expect(await screen.findByLabelText(/Scegli immagini/)).toBeVisible();
     expect(onSubmit).toHaveBeenCalledOnce();
 
     fireEvent.click(screen.getByRole("button", { name: "Vai al riepilogo" }));

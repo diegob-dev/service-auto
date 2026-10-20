@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { CarWithImages } from "./types";
-import { getCarImageUrl } from "./api";
+import { getCarThumbnailUrl } from "./api";
 import { formatCarPrice, formatCarKilometers } from "@/lib/formatters";
 import { CalendarDays, Fuel, Gauge } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function CarCard({
   const coverImage =
     car.car_images.find((image) => image.is_cover) ?? car.car_images[0];
 
-  const coverUrl = coverImage ? getCarImageUrl(coverImage.storage_path) : null;
+  const coverUrl = coverImage ? getCarThumbnailUrl(coverImage) : null;
 
   return (
     <Card className="relative h-full w-full pt-0">

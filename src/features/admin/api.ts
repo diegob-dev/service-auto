@@ -4,6 +4,8 @@ import { buildCarSlug } from "@/features/cars/slug";
 import type { AdminUser, CarInput, StaffRole } from "./types";
 import { adminAuthEmail, recoveryEmail } from "../../../supabase/functions/_shared/admin-identity";
 import { adminError } from "./errors";
+import { createThumbnail } from "./prepareImage";
+import { getCarImageUrl } from "@/features/cars/api";
 
 const CAR_IMAGES_BUCKET = "car-image";
 
@@ -225,6 +227,34 @@ export async function uploadCarImage(
     }
     throw error instanceof Error ? error : new Error("Immagine non salvata");
   }
+}
+
+/**
+ * Crea la miniatura di una foto caricata prima che esistessero le miniature.
+ * Restituisce false se il browser non riesce a generarla.
+ */
+export async function addMissingThumbnail(image: CarImageRecord) {
+  const response = await fetch(getCarImageUrl(image.storage_path));
+  if (!response.ok) throw new Error(`Foto non scaricabile (${response.status})`);
+  const blob = await response.blob();
+  const fileName = image.storage_path.split("/").pop() || "foto";
+  const thumbnail = await createThumbnail(new File([blob], fileName, { type: blob.type }));
+  if (!thumbnail) return false;
+
+  const safeName = thumbnail.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
+  const thumbnailPath = `${image.car_id}/thumbs/${safeName}`;
+  const { error: uploadError } = await supabase.storage
+    .from(CAR_IMAGES_BUCKET)
+    .upload(thumbnailPath, thumbnail, { contentType: thumbnail.type, upsert: true });
+  if (uploadError) throw adminError(uploadError.message);
+
+  const { error } = await supabase
+    .from("car_images")
+    .update({ thumbnail_path: thumbnailPath })
+    .eq("id", image.id)
+    .is("thumbnail_path", null);
+  if (error) throw adminError(error.message);
+  return true;
 }
 
 /** Salva il nuovo ordine delle foto: la posizione diventa l'indice nell'elenco. */

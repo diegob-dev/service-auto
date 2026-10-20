@@ -83,9 +83,10 @@ del 15 ottobre 2026, che modifica la targa solo quando la richiesta contiene
 il campo `license_plate`. La migrazione `20261020100000_car_image_thumbnails`
 aggiunge le miniature delle foto: va applicata **prima** di pubblicare il nuovo
 frontend, perché il catalogo pubblico legge la colonna `thumbnail_path`
-(altrimenti la build fallisce durante il prerender). Dopo la migrazione eseguire
-una volta `scripts/generate-thumbnails.py` per creare le miniature delle foto già
-caricate; le nuove foto caricate dall'area admin le ricevono automaticamente.
+(altrimenti la build fallisce durante il prerender). Le nuove foto ricevono la
+miniatura al caricamento; quelle già presenti la ottengono in automatico, in
+background, la prima volta che qualcuno dello staff apre l'area admin dopo il
+deploy. Finché manca, il sito usa la foto completa.
 Distribuire la versione corrente di `admin-users`
 seguendo il README. Non considerare una build del frontend come conferma
 dell'aggiornamento del database o della funzione.

@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { CarWithImages } from "@/features/cars/types";
 import { supabase } from "@/lib/supabase";
 import * as adminApi from "../api";
+import { backfillMissingThumbnails } from "../thumbnailBackfill";
 import { emptyCar } from "../constants";
 import type { AdminUser, CarInput, StaffRole } from "../types";
 import { clearPasswordRecoveryError, passwordRecoveryRedirect } from "@/lib/passwordRecoveryRedirect";
@@ -73,7 +74,8 @@ export function useAdminDashboard() {
       setCurrentUser(profile);
       setTab("cars");
       setCheckingAuth(false);
-      await refresh(profile.role);
+      const loadedCars = await refresh(profile.role);
+      if (loadedCars) backfillMissingThumbnails(loadedCars);
     } catch (caught) {
       setSession(null);
       setError(caught instanceof Error ? caught.message : "Verifica account non riuscita");

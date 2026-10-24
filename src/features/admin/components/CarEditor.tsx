@@ -7,13 +7,14 @@ import type { CarInput } from "../types";
 import { ImagesEditor } from "./ImagesEditor";
 import { buildCarSlug } from "@/features/cars/slug";
 import { useDialog } from "@/lib/useDialog";
+import type { ArchivedImage } from "../imageArchive";
 
 type CarEditorProps = {
   value: CarInput;
   busy: boolean;
   onChange: (value: CarInput) => void;
   onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
+  onSubmit: (event: FormEvent<HTMLFormElement>, archiveImages?: ArchivedImage[]) => Promise<boolean>;
   onImagesChanged: () => Promise<void>;
 };
 
@@ -41,11 +42,14 @@ const numberFields = [
 ] as const;
 
 export function CarEditor(props: CarEditorProps) {
-  const { value, busy, onChange, onClose, onSubmit, onImagesChanged } = props;
+  const { value, busy: saving, onChange, onClose, onSubmit, onImagesChanged } = props;
+  const [imagesBusy, setImagesBusy] = useState(false);
+  const [pendingImages, setPendingImages] = useState<ArchivedImage[]>([]);
+  const busy = saving || imagesBusy;
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   // Esc chiede conferma: un tasto premuto per sbaglio non deve far perdere il lavoro.
   const dialogRef = useDialog<HTMLDivElement>(() => {
-    if (window.confirm("Chiudere l’editor? Le modifiche non salvate andranno perse.")) onClose();
+    if (!busy && window.confirm("Chiudere l’editor? Le modifiche non salvate andranno perse.")) onClose();
   });
   const formRef = useRef<HTMLFormElement>(null);
   const set = (key: keyof CarInput, next: unknown) => onChange({ ...value, [key]: next });
@@ -66,7 +70,7 @@ export function CarEditor(props: CarEditorProps) {
   }
 
   async function saveAndFinish(event: FormEvent<HTMLFormElement>) {
-    if (await onSubmit(event)) onClose();
+    if (await onSubmit(event, pendingImages)) { setPendingImages([]); onClose(); }
   }
 
   function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
@@ -90,7 +94,7 @@ export function CarEditor(props: CarEditorProps) {
       >
         <div className="mb-6 flex items-center justify-between">
           <h2 id="car-editor-title" className="font-display text-3xl uppercase">{value.id ? "Modifica auto" : "Nuova auto"}</h2>
-          <Button type="button" variant="ghost" size="icon" aria-label="Chiudi" onClick={onClose}><X /></Button>
+          <Button type="button" variant="ghost" size="icon" aria-label="Chiudi" disabled={busy} onClick={onClose}><X /></Button>
         </div>
 
         <ol className="mb-8 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Passaggi di configurazione">
@@ -219,10 +223,11 @@ export function CarEditor(props: CarEditorProps) {
 
         {step === 3 && value.id && (
           <>
-            <ImagesEditor car={{ ...value, id: value.id }} onChanged={onImagesChanged} />
+            <ImagesEditor car={{ ...value, id: value.id }} onChanged={onImagesChanged} onBusyChanged={setImagesBusy}
+              pendingImages={pendingImages} onPendingImagesChanged={setPendingImages} />
             <div className="mt-7 flex flex-wrap justify-between gap-2">
-              <Button type="button" variant="outline" onClick={() => setStep(2)}>Indietro</Button>
-              <Button type="button" onClick={() => setStep(4)}>Vai al riepilogo</Button>
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setStep(2)}>Indietro</Button>
+              <Button type="button" disabled={busy} onClick={() => setStep(4)}>Vai al riepilogo</Button>
             </div>
           </>
         )}
@@ -244,7 +249,7 @@ export function CarEditor(props: CarEditorProps) {
                     ["Cambio", value.transmission || "-"],
                     ["Colore", value.color || "-"],
                     ["Potenza", value.power_cv == null ? "-" : `${value.power_cv} CV`],
-                    ["Immagini", value.car_images?.length ?? 0],
+                    ["Immagini", (value.car_images?.length ?? 0) + pendingImages.length],
                   ].map(([label, detail]) => (
                     <div key={label}>
                       <dt className="text-muted-foreground">{label}</dt>

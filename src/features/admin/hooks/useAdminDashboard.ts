@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { CarWithImages } from "@/features/cars/types";
 import { supabase } from "@/lib/supabase";
 import * as adminApi from "../api";
+import type { ArchivedImage } from "../imageArchive";
 import { backfillMissingThumbnails } from "../thumbnailBackfill";
 import { emptyCar } from "../constants";
 import type { AdminUser, CarInput, StaffRole } from "../types";
@@ -172,13 +173,13 @@ export function useAdminDashboard() {
     }
   }
 
-  async function saveCar(event: FormEvent<HTMLFormElement>) {
+  async function saveCar(event: FormEvent<HTMLFormElement>, archiveImages: ArchivedImage[] = []) {
     event.preventDefault();
     if (!carForm) return false;
     setBusy(true);
     setError("");
     try {
-      const saved = await adminApi.saveCar(carForm);
+      const saved = await adminApi.saveCar(carForm, archiveImages);
       setCarForm({ ...saved, car_images: carForm.car_images ?? [] });
       await refresh(currentUser?.role);
       await invalidateCars();

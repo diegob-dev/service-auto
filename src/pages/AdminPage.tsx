@@ -7,6 +7,8 @@ import { CarsPanel } from "@/features/admin/components/CarsPanel";
 import { UsersPanel } from "@/features/admin/components/UsersPanel";
 import { useAdminDashboard } from "@/features/admin/hooks/useAdminDashboard";
 import { requestPasswordReset } from "@/features/admin/api";
+import { useState } from "react";
+import { ImageArchive } from "@/features/admin/components/ImageArchive";
 
 function AdminAccessLoading() {
   return (
@@ -59,6 +61,7 @@ function AdminDataLoading() {
 
 export function AdminPage() {
   const admin = useAdminDashboard();
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const isAdmin = admin.currentUser?.role === "admin";
 
   if (admin.checkingAuth) {
@@ -148,6 +151,11 @@ export function AdminPage() {
           </>
         </div>
       )}
+
+      <Button variant="outline" className="mb-4" onClick={() => setArchiveOpen(!archiveOpen)} aria-expanded={archiveOpen}>
+        {archiveOpen ? "Chiudi archivio foto" : "Apri archivio foto"}
+      </Button>
+      {archiveOpen && <ImageArchive />}
 
       {admin.tab === "cars" ? (
         <CarsPanel

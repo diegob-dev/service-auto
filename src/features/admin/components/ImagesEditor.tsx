@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { ChevronLeft, ChevronRight, ImagePlus, Star, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCarThumbnailUrl } from "@/features/cars/api";
@@ -6,20 +6,26 @@ import * as adminApi from "../api";
 import { createThumbnail, prepareImageForUpload } from "../prepareImage";
 import { adminInputClass } from "../constants";
 import type { CarInput } from "../types";
+import { ImageArchive } from "./ImageArchive";
+import type { ArchivedImage } from "../imageArchive";
 
 type ImagesEditorProps = {
   car: CarInput & { id: string };
   onChanged: () => Promise<void>;
+  onBusyChanged?: (busy: boolean) => void;
+  pendingImages?: ArchivedImage[];
+  onPendingImagesChanged?: (images: ArchivedImage[]) => void;
 };
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
+export function ImagesEditor({ car, onChanged, onBusyChanged, pendingImages = [], onPendingImagesChanged }: ImagesEditorProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState("");
   const imageCount = car.car_images?.length ?? 0;
+  useEffect(() => { onBusyChanged?.(busy); }, [busy, onBusyChanged]);
 
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -212,6 +218,10 @@ export function ImagesEditor({ car, onChanged }: ImagesEditorProps) {
         </div>
       )}
 
+      <fieldset disabled={busy}>
+        <ImageArchive carId={car.id} onChanged={onChanged} onBusyChanged={setBusy}
+          pendingImages={pendingImages} onStage={onPendingImagesChanged} />
+      </fieldset>
       <form className="mt-6 rounded-xl bg-muted p-5" onSubmit={upload}>
         <h4 className="flex items-center gap-2 font-bold"><Upload size={18} aria-hidden="true" /> Aggiungi fotografie</h4>
         <div className="mt-4 grid gap-4 md:grid-cols-2">

@@ -4,6 +4,8 @@ import * as adminApi from "../api";
 import type { CarInput } from "../types";
 import { ImagesEditor } from "./ImagesEditor";
 
+vi.mock("./ImageArchive", () => ({ ImageArchive: () => null }));
+
 vi.mock("@/features/cars/api", () => ({
   getCarImageUrl: (path: string) => `https://images.test/${path}`,
   getCarThumbnailUrl: (image: { storage_path: string; thumbnail_path?: string | null }) =>

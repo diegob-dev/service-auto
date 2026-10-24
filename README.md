@@ -3,6 +3,8 @@
 Sito vetrina e catalogo auto con area riservata, sviluppato con React, TypeScript,
 Vite e Supabase. La preparazione della consegna è descritta in [PRODUZIONE.md](PRODUZIONE.md).
 
+L’archivio foto da WhatsApp e i passaggi per attivare il bot sono descritti in [WHATSAPP.md](WHATSAPP.md).
+
 ## Sviluppo e verifiche
 
 Copia `.env.example` in `.env` e configura le chiavi pubbliche del progetto.

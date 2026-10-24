@@ -6,6 +6,7 @@ import { adminAuthEmail, recoveryEmail } from "../../../supabase/functions/_shar
 import { adminError } from "./errors";
 import { createThumbnail } from "./prepareImage";
 import { getCarImageUrl } from "@/features/cars/api";
+import { prepareArchivedImage, type ArchivedImage } from "./imageArchive";
 
 const CAR_IMAGES_BUCKET = "car-image";
 
@@ -84,7 +85,7 @@ export async function requestPasswordReset(identifier: string) {
   if (error) throw adminError(error.message);
 }
 
-export async function saveCar(car: CarInput) {
+export async function saveCar(car: CarInput, archiveImages: ArchivedImage[] = []) {
   const optionalFeatures = car.optional_features
     .map((feature) => feature.trim())
     .filter(Boolean);
@@ -123,14 +124,23 @@ export async function saveCar(car: CarInput) {
     status: car.status,
     featured: car.featured,
   };
-  const { data, error } = await supabase.rpc("staff_save_car", {
+  const prepared = [];
+  if (archiveImages.length && !car.id) throw new Error("Salva prima i dati dell’auto.");
+  for (const image of archiveImages) prepared.push(await prepareArchivedImage(image, car.id!));
+  const { data, error } = await supabase.rpc(archiveImages.length ? "staff_save_car_with_archive" : "staff_save_car", {
     p_car: {
       ...values,
       id: car.id,
       license_plate: car.license_plate,
     },
+    ...(archiveImages.length ? { p_images: prepared } : {}),
   });
-  return dataOrThrow<CarRecord & { license_plate: string | null }>(data, error);
+  const saved = dataOrThrow<CarRecord & { license_plate: string | null }>(data, error);
+  if (archiveImages.length) {
+    try { await supabase.storage.from("image-archive").remove(archiveImages.map((image) => image.storage_path)); }
+    catch { /* The database commit succeeded; private originals can be cleaned later. */ }
+  }
+  return saved;
 }
 
 export async function deleteCar(car: CarWithImages) {
